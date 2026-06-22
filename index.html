@@ -515,7 +515,8 @@ body{
   </div>
   <div class="send-card">
     <div class="send-title">📤 Enviar relatório</div>
-    <div class="send-desc">Aciona o agente <strong>process-inspection-completed</strong> e notifica o Slack de Implantação.</div>
+    <div class="send-desc">O relatório é registrado automaticamente no canal <strong>#vistorias-app-teste</strong>.</div>
+    <div id="send-status" style="display:none;font-size:13px;font-weight:600;padding:6px 0"></div>
     <div class="send-btns">
       <button class="btn-send" onclick="sendSlack()">💬 Slack</button>
       <button class="btn-send" onclick="sendPlatform()">🔗 Plataforma</button>
@@ -719,6 +720,10 @@ function initMonicaAvatars(){ /* SVG já está no HTML — nada a fazer */ }
 // Preencha após Monica gravar e criar a voz no ElevenLabs:
 const ELEVEN_API_KEY  = 'sk_360639b0530d505a2d486ac251f96f016c4d1831d2ff2f62';
 const MONICA_VOICE_ID = '9FdNXU6Ju6062J29ADKr';
+
+// ── ENVIO AUTOMÁTICO DO RELATÓRIO (Cloudflare Worker) ─────────
+// Preencha com a URL do Worker depois de publicá-lo (ex: https://vistoria-report.xxx.workers.dev)
+const REPORT_WORKER_URL = '';
 
 let currentAudio=null;
 async function speakElevenLabs(text){
@@ -2000,6 +2005,9 @@ async function showSummary(){
   const missingMsg=missingMand.length>0?` Atenção: ${missingMand.length} item${missingMand.length>1?'s':''} obrigatório${missingMand.length>1?'s':''} ainda faltando pra ativar o imóvel!`:'';
   const modeLabel=S.mode==='revisao'?'revisão':'vistoria';
   ia(`${S.name?S.name.split(' ')[0]+', ':''}${modeLabel} concluída! Você foi incrível! ${S.results.length} itens registrados e ${fotos.length} fotos tiradas.${manutMsg}${missingMsg} Muito obrigada pelo capricho!`);
+
+  // registra o relatório automaticamente (commit GitHub + post Slack via Worker)
+  autoSendReport();
 }
 
 // ── RELATÓRIO / LAUDO ─────────────────────────────────────────
@@ -2037,7 +2045,7 @@ function buildReport(){
   return txt;
 }
 
-async function gerarRelatorioHTML(){
+async function buildReportHTML(){
   const fotos=await getAllFotos();
   const fotoMap={};
   await Promise.all(fotos.map(f=>new Promise(res=>{
@@ -2192,10 +2200,39 @@ document.getElementById('btn-dl').onclick=function(){
 <\/script>
 </body></html>`;
 
+  return html;
+}
+
+async function gerarRelatorioHTML(){
+  const html=await buildReportHTML();
   const w=window.open('','_blank');
   if(!w){alert('Permita popups para gerar o relatório.');return;}
   w.document.write(html);
   w.document.close();
+}
+
+// Envia o relatório pro Worker (commit no GitHub + post no Slack). Silencioso se não configurado.
+async function autoSendReport(){
+  const statusEl=document.getElementById('send-status');
+  if(!REPORT_WORKER_URL){ if(statusEl) statusEl.style.display='none'; return; }
+  if(!S.results||!S.results.length) return;
+  if(statusEl){ statusEl.style.display='block'; statusEl.textContent='⏳ Enviando relatório para registro…'; statusEl.style.color='var(--muted)'; }
+  try{
+    const html=await buildReportHTML();
+    const res=await fetch(REPORT_WORKER_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({code:S.prop,html})
+    });
+    const data=await res.json().catch(()=>({}));
+    if(res.ok&&data.url){
+      if(statusEl){ statusEl.innerHTML='✅ Relatório registrado — <a href="'+data.url+'" target="_blank" style="color:var(--blue);font-weight:700">abrir link</a>'; statusEl.style.color='var(--green)'; }
+    } else {
+      if(statusEl){ statusEl.textContent='⚠ Não consegui registrar agora (relatório segue disponível no botão acima).'; statusEl.style.color='var(--orange,#FF8904)'; }
+    }
+  }catch(e){
+    if(statusEl){ statusEl.textContent='⚠ Sem conexão para registrar agora (relatório segue disponível no botão acima).'; statusEl.style.color='var(--orange,#FF8904)'; }
+  }
 }
 
 function sendSlack(){navigator.clipboard.writeText(buildReport()).then(()=>alert('Copiado! Cole no #implantacao do Slack.'));}
