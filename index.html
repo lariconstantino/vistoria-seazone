@@ -188,7 +188,10 @@ body{
 .manut-item:last-child{border-bottom:none}
 /* intro placeholder */
 .intro-placeholder{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px 20px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
-.intro-placeholder-icon{width:72px;height:72px;border-radius:50%;background:var(--secondary);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:32px}
+.intro-placeholder-icon{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#0055FF 0%,#003DC2 100%);border:3px solid rgba(0,85,255,.15);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;transition:box-shadow .3s ease}
+.intro-placeholder-icon img{width:100%;height:100%;object-fit:cover;object-position:top center}
+.intro-placeholder-icon .avatar-initials{font-size:24px;font-weight:700;color:#fff;letter-spacing:.5px;user-select:none}
+.intro-placeholder-icon.speaking{box-shadow:0 0 0 3px #0055FF,0 0 0 7px rgba(0,85,255,.18),0 0 0 12px rgba(0,85,255,.07)}
 .intro-placeholder-name{font-size:18px;font-weight:700;color:var(--foreground);letter-spacing:-.3px}
 .intro-placeholder-role{font-size:12px;color:var(--muted-foreground);letter-spacing:.06em;text-transform:uppercase}
 .intro-voice-bars{display:flex;align-items:center;gap:3px;height:28px;margin:4px 0}
@@ -332,7 +335,7 @@ body{
 <!-- PROPERTY DISCOVERY -->
 <div id="s-property-desc" class="screen">
   <div class="intro-placeholder">
-    <div class="intro-placeholder-icon">👩‍💼</div>
+    <div class="intro-placeholder-icon" data-avatar><span class="avatar-initials">MM</span></div>
     <div>
       <div class="intro-placeholder-name">Monica Medeiros</div>
       <div class="intro-placeholder-role">Seazone · Implantação</div>
@@ -385,9 +388,8 @@ body{
 <!-- INTRO -->
 <div id="s-intro" class="screen">
 
-  <!-- Card placeholder Monica — avatar será adicionado quando o marketing entregar o Voice ID -->
   <div class="intro-placeholder">
-    <div class="intro-placeholder-icon">👩‍💼</div>
+    <div class="intro-placeholder-icon" data-avatar><span class="avatar-initials">MM</span></div>
     <div>
       <div class="intro-placeholder-name">Monica Medeiros</div>
       <div class="intro-placeholder-role">Seazone · Implantação</div>
@@ -435,7 +437,7 @@ body{
     <!-- IA speaking indicator -->
     <div class="ia-speaking" id="ia-speaking">
       <div class="ia-wave"><span></span><span></span><span></span><span></span></div>
-      <span id="ia-text">IA falando…</span>
+      <span id="ia-text">Monica falando…</span>
     </div>
 
     <div class="item-name" id="ip-item-name"></div>
@@ -718,10 +720,21 @@ function doneItems(){return S.results.filter(r=>!r.custom).length}
 function expQty(name){return(!S.guests||!PER_GUEST.has(name))?1:S.guests}
 function isStruct(name){return STRUCTURAL.has(name)||/^(Piso|Parede|Teto|Porta|Janela|Cortina|Lâmpada|Interruptor|Ralo|Box|Exaust|Lareira|Guarda|Interfone|Modem|Wi-fi|Quadro|Voltag|Pin|Tour|Capacidade|Itens pessoais)/i.test(name)}
 
+// ── AVATAR DA MONICA ──────────────────────────────────────────
+// Troque para URL ou base64 quando tiver a foto: 'data:image/jpeg;base64,...'
+const MONICA_AVATAR = '';
+
+function initMonicaAvatars(){
+  if(!MONICA_AVATAR) return;
+  document.querySelectorAll('[data-avatar]').forEach(el=>{
+    el.innerHTML=`<img src="${MONICA_AVATAR}" alt="Monica Medeiros">`;
+  });
+}
+
 // ── CONFIGURAÇÃO ELEVENLABS (voz real da Monica) ──────────────
 // Preencha após Monica gravar e criar a voz no ElevenLabs:
-const ELEVEN_API_KEY  = '';  // ex: 'sk_abc123...'
-const MONICA_VOICE_ID = '';  // ex: 'pNInz6obpgDQGcFmaJgB'
+const ELEVEN_API_KEY  = 'sk_360639b0530d505a2d486ac251f96f016c4d1831d2ff2f62';
+const MONICA_VOICE_ID = '9FdNXU6Ju6062J29ADKr';
 
 async function speakElevenLabs(text){
   if(!ELEVEN_API_KEY||!MONICA_VOICE_ID) return false;
@@ -759,6 +772,7 @@ function loadVoices(){
 }
 window.speechSynthesis.addEventListener('voiceschanged',loadVoices);
 loadVoices();
+initMonicaAvatars();
 
 // ── ENGINE DE VOZ ──────────────────────────────────────────────
 let speechQueue=[];
@@ -800,6 +814,7 @@ function setIaUI(active, text=''){
   el.classList.toggle('active', active);
   if(txt&&text) txt.textContent=text.length>60?text.slice(0,57)+'…':text;
   S.iaSpeaking=active;
+  document.querySelectorAll('[data-avatar]').forEach(a=>a.classList.toggle('speaking',active));
 }
 
 // ── SCRIPTS NO TOM DA MONICA ──────────────────────────────────
