@@ -1614,7 +1614,7 @@ function renderItem(){
   const fotoBtn=document.getElementById('btn-foto-main');
   const fotoObrig=document.getElementById('foto-obrig');
   const noPhoto=isLocItem||NO_PHOTO_ITEMS.has(item.name)||BATCH_ITEMS.has(item.name);
-  if(fotoBtn){fotoBtn.style.display=noPhoto?'none':'';if(!noPhoto)fotoBtn.classList.add('required');}
+  if(fotoBtn){fotoBtn.style.display=noPhoto?'none':'';fotoBtn.textContent='📷 Tirar foto';if(!noPhoto)fotoBtn.classList.add('required');}
   if(fotoObrig){fotoObrig.classList.remove('visible');}
   if(noPhoto) S.currentItemHasPhoto=true;
 }
@@ -2126,11 +2126,15 @@ async function onFotoSelected(e){
   S.currentItemHasPhoto=true;
   const fotoBtn=document.getElementById('btn-foto-main');
   const fotoObrig=document.getElementById('foto-obrig');
-  if(fotoBtn) fotoBtn.classList.remove('required');
+  if(fotoBtn){fotoBtn.classList.remove('required');fotoBtn.textContent='📷 Adicionar outra foto';}
   if(fotoObrig) fotoObrig.classList.remove('visible');
 
-  // IA confirma e pede para dizer pronto
-  ia('Foto registrada. Diz pronto pra avançar.');
+  // Conta fotos deste item e adapta a fala (mais fotos se houver problema)
+  const n=document.querySelectorAll('#foto-grid .foto-thumb').length;
+  const msg = n>1
+    ? `Mais uma foto registrada. Se quiser, tira mais — quanto mais detalhe do problema, melhor. Ou diz pronto.`
+    : `Foto registrada. Se o item tiver algum problema, pode tirar mais fotos. Ou diz pronto pra avançar.`;
+  ia(msg);
   if(SpeechRec&&!S.listening) startListening();
 }
 
@@ -2346,10 +2350,13 @@ async function buildReportHTML(){
     const summaryColor=envIssues>0?'#FF8904':'#059669';
     const gridItems=items.map(it=>{
       const key=`${env}||${it.item}`;
-      const foto=(fotoMap[key]||[])[0];
+      const fotos=(fotoMap[key]||[]);
       const isPinLoc=it.item==='Pin de localização'&&it.note&&it.note.includes('google.com/maps');
-      const fotoHtml=foto
-        ?`<img src="${foto.dataUrl}" style="width:100%;max-height:140px;object-fit:cover;border-radius:6px;display:block;margin-bottom:6px"/>`
+      const condCap=`<span style="position:absolute;left:4px;bottom:4px;background:${sColor[it.status]};color:#fff;font-size:9px;font-weight:700;border-radius:4px;padding:1px 6px;box-shadow:0 1px 3px rgba(0,0,0,.3)">${sIcon[it.status]} ${sLabel[it.status]}</span>`;
+      const fotoHtml=fotos.length
+        ?`<div style="display:grid;grid-template-columns:${fotos.length>1?'1fr 1fr':'1fr'};gap:5px;margin-bottom:6px">`+
+           fotos.map(f=>`<div style="position:relative"><img src="${f.dataUrl}" style="width:100%;max-height:130px;object-fit:cover;border-radius:6px;display:block"/>${condCap}</div>`).join('')+
+         `</div>`
         :(isPinLoc?'':`<div style="width:100%;height:60px;background:#F3F3F5;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;font-size:10px;color:#aaa">sem foto</div>`);
       const border=it.status!=='ok'?sColor[it.status]:'#E6E7EA';
       return `<div style="border:1.5px solid ${border};border-radius:8px;padding:10px;background:${it.status!=='ok'?sBg[it.status]:'#fff'}">
