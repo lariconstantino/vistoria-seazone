@@ -1403,6 +1403,15 @@ const STEP_SCRIPTS=[
   {step:'step-3', txt:'Disse pronto? A gente passa pro próximo automaticamente. Assim a vistoria fica registrada de verdade.'}
 ];
 
+// Explicação inicial como UMA fala contínua (sem pausas), no tom da Monica.
+const FULL_INTRO=`Oi! Vistoria bem feita é o que separa um imóvel que fatura do que gera reclamação, né? Então bora juntas, que é rapidinho. Funciona assim: pra cada item, você fala como tá — bom, com ressalva ou ausente — que eu já anoto aqui. A foto é obrigatória, viu? Item sem foto não avança; só os ausentes que são exceção. E quando terminar, é só dizer "pronto" que a gente já passa pro próximo, automático. Assim a vistoria fica registrada de verdade, sem deixar nada pra trás. Bora começar!`;
+// marcadores pra revelar cada card no instante em que ela fala aquela parte
+const _introCards=[
+  {step:'step-1', at:'pra cada item'},
+  {step:'step-2', at:'a foto é obrigatória'},
+  {step:'step-3', at:'é só dizer'},
+];
+
 let _wordTimer=null;
 let _introBarsTimer=null;
 const _ibarPhases=[0,.7,1.4,2.1,2.8,3.5,4.2,4.9,5.6];
@@ -1433,7 +1442,8 @@ function stopIntroBars(){
 function showIntro(){
   show('s-intro');
   document.getElementById('btn-intro-start').style.display='none';
-  document.getElementById('intro-steps-wrap').style.display='none';
+  const wrap=document.getElementById('intro-steps-wrap');
+  wrap.style.display='flex';wrap.style.flexDirection='column';wrap.style.gap='10px';
   ['step-1','step-2','step-3'].forEach(id=>document.getElementById(id).classList.remove('show'));
   stopIntroBars();
 
@@ -1443,43 +1453,32 @@ function showIntro(){
     startIntroBars();
 
     // Texto progride com a fala
-    const words=MONICA_INTRO_SCRIPT.split(' ');
+    const words=FULL_INTRO.split(' ');
     let wIdx=0;
     clearInterval(_wordTimer);
     _wordTimer=setInterval(()=>{
       if(wIdx<words.length) speechEl.textContent=words.slice(0,++wIdx).join(' ');
       else clearInterval(_wordTimer);
-    },110);
+    },150);
 
-    ia(MONICA_INTRO_SCRIPT,()=>{
-      clearInterval(_wordTimer);
-      speechEl.textContent=MONICA_INTRO_SCRIPT;
-      stopIntroBars();
-
-      setTimeout(()=>{
-        const wrap=document.getElementById('intro-steps-wrap');
-        wrap.style.display='flex';
-        wrap.style.flexDirection='column';
-        wrap.style.gap='10px';
-
-        // revela os cards em cascata, sincronizado com o ritmo da fala (~55ms/caractere)
-        let acc=0;
-        STEP_SCRIPTS.forEach(s=>{
-          const d=acc;
-          setTimeout(()=>document.getElementById(s.step).classList.add('show'), d);
-          acc += Math.round(s.txt.length*55);
-        });
-
-        // narra os 3 passos numa única requisição → sem pausas entre eles
-        startIntroBars();
-        const full=STEP_SCRIPTS.map(s=>s.txt).join(' ');
-        ia(full,()=>{
-          stopIntroBars();
-          document.getElementById('btn-intro-start').style.display='block';
-        });
-      },500);
+    // Revela cada card quando a fala chega na parte dele (BASE compensa a latência do áudio)
+    const low=FULL_INTRO.toLowerCase();
+    const MS_CHAR=62, BASE=1000;
+    _introCards.forEach(c=>{
+      const idx=low.indexOf(c.at);
+      const delay=BASE + Math.max(0,idx)*MS_CHAR;
+      setTimeout(()=>{const el=document.getElementById(c.step); if(el) el.classList.add('show');}, delay);
     });
-  },400);
+
+    // UMA única narração contínua — sem pausas entre abertura e passos
+    ia(FULL_INTRO,()=>{
+      clearInterval(_wordTimer);
+      speechEl.textContent=FULL_INTRO;
+      stopIntroBars();
+      ['step-1','step-2','step-3'].forEach(id=>document.getElementById(id).classList.add('show'));
+      document.getElementById('btn-intro-start').style.display='block';
+    });
+  },300);
 }
 
 function iniciarVistoriaAposIntro(){
