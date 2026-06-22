@@ -127,6 +127,21 @@ body{
 /* chips de utensílios (tocar = marcar ausente) */
 .ba-chip{background:var(--input);border:1.5px solid var(--border);border-radius:var(--rfull);padding:6px 12px;font-size:12px;font-weight:600;color:var(--navy);cursor:pointer;font-family:var(--font);-webkit-tap-highlight-color:transparent}
 .ba-chip.missing{background:#FEF2F2;border-color:#E7000B;color:#E7000B;text-decoration:line-through}
+/* grupo de itens */
+.grp-row{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.grp-row-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.grp-check{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;background:var(--muted-bg);color:var(--muted);flex-shrink:0}
+.grp-check.v{background:#ECFDF5;color:#059669}
+.grp-check.x{background:#FEF2F2;color:#E7000B}
+.grp-name{font-size:14px;font-weight:700;color:var(--navy);flex:1;min-width:0}
+.grp-qty{width:52px;text-align:center;font-size:15px;font-weight:700;color:var(--blue);border:1.5px solid var(--border);border-radius:8px;padding:4px;background:var(--input);font-family:var(--font);-moz-appearance:textfield}
+.grp-qty::-webkit-outer-spin-button,.grp-qty::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.grp-status{display:flex;gap:6px}
+.grp-st{flex:1;padding:8px 4px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-family:var(--font);font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.grp-st.ok.on{background:#059669;border-color:#059669;color:#fff}
+.grp-st.ressalva.on{background:#FF8904;border-color:#FF8904;color:#fff}
+.grp-st.ausente.on{background:#E7000B;border-color:#E7000B;color:#fff}
+#grp-next:disabled{opacity:.45}
 .foto-thumb{position:relative;width:76px;height:76px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);flex-shrink:0}
 .foto-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .foto-badge{position:absolute;bottom:3px;right:3px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
@@ -369,6 +384,23 @@ body{
   </div>
 </div>
 
+<!-- GRUPO DE ITENS (1 foto cobre o grupo; marca cada item) -->
+<div id="s-group" class="screen">
+  <div class="prog-header">
+    <span class="small" style="color:var(--muted)" id="grp-env-lbl"></span>
+    <span class="env-badge"><span class="env-badge-dot"></span><span id="grp-env-name"></span></span>
+  </div>
+  <div class="card">
+    <div style="font-size:18px;font-weight:700;color:var(--fg);letter-spacing:-.2px" id="grp-title">Grupo</div>
+    <div class="item-instruction">📷 Esses itens podem entrar na <strong>mesma foto</strong>. Tire uma (ou mais) e marque cada um.</div>
+    <input type="file" id="grp-foto-input" accept="image/*" capture="environment" style="display:none" onchange="onGroupPhoto(event)"/>
+    <button class="btn-foto required" id="grp-btn-foto" onclick="document.getElementById('grp-foto-input').click()">📷 Tirar foto</button>
+    <div class="foto-grid" id="grp-foto-grid"></div>
+    <div id="grp-items"></div>
+    <button class="btn btn-primary" id="grp-next" onclick="confirmGroup()">Próximo ▶</button>
+  </div>
+</div>
+
 <!-- PROPERTY DISCOVERY -->
 <div id="s-property-desc" class="screen">
   <div class="intro-placeholder">
@@ -598,7 +630,7 @@ body{
 <script>
 // ── DATA ─────────────────────────────────────────────────────
 const STRUCTURAL=new Set(['Piso','Parede','Teto','Porta','Janelas','Janela','Cortina','Lâmpadas','Interruptores/tomadas','Ralo','Box','Exaustor','Lareira interna','Guarda-corpo','Interfone','Modem de internet','Wi-fi','Quadro de luz','Voltagem','Pin de localização','Tour pelo imóvel','Capacidade de hóspedes','Itens pessoais do proprietário','Tela de proteção','Depurador de Ar']);
-const PER_GUEST=new Set(['Travesseiros','Garfos','Facas','Colheres de sopa','Colheres de chá','Pratos rasos','Pratos de sobremesa','Copos de vidro','Taças de vinho','Xícaras','Cabides','Enxoval','Pano de prato']);
+const PER_GUEST=new Set(['Travesseiros','Garfos','Facas','Colheres de sopa','Colheres de chá','Pratos grandes','Pratos fundos','Pratos de sobremesa','Copos de vidro','Taças de vinho','Xícaras','Cabides','Enxoval','Pano de prato']);
 
 // Categorias para prompts de teste específicos
 const ELECTRONICS=new Set(['Televisão','Ventilador','Ar condicionado','Geladeira','Freezer (congelador)','Fogão','Forno','Microondas','Cafeteira','Liquidificador','Chaleira','Airfryer','Sanduicheira','Lava louça','Máquina de lavar','Secadora','Ferro de passar','Lâmpadas','Interruptores/tomadas','Exaustor','Modem de internet','Wi-fi','Secador de cabelo','Frigobar/Cervejeira/Adega','Depurador de Ar','Quadro de luz']);
@@ -609,7 +641,7 @@ const TESTABLE_STRUCT=new Set(['Porta','Janelas','Janela','Cortina','Lareira int
 const BATCH_ITEMS=new Set([
   'Garfos','Facas','Colheres de sopa','Colheres de chá','Abridor de vinho e cerveja',
   'Colheres para cozinhar','Pegador de macarrão','Facas de corte','Peneira',
-  'Tábua de vidro ou plástico','Pratos rasos','Pratos de sobremesa','Copos de vidro',
+  'Tábua de vidro ou plástico','Pratos grandes','Pratos de sobremesa','Copos de vidro',
   'Taças de vinho','Xícaras','Panelas','Frigideira','Pano de prato','Jarra de água',
   'Escorredor de louça','Lixeira de pia','Lixeira de lixo seco','Forma de alumínio'
 ]);
@@ -630,7 +662,7 @@ const MANDATORY_ITEMS=new Set([
   'Box','Lixeira','Espelho','Escova sanitária','Secador de cabelo','Chuveiro',
   'Fogão','Microondas','Liquidificador','Geladeira','Sanduicheira','Cafeteira',
   'Chaleira','Peneira','Frigideira','Escorredor de louça',
-  'Facas','Garfos','Colheres de sopa','Pratos rasos','Copos de vidro','Taças de vinho','Xícaras',
+  'Facas','Garfos','Colheres de sopa','Pratos grandes','Copos de vidro','Taças de vinho','Xícaras',
   'Rodo','Balde','Vassoura','Pá de lixo','Ferro de passar','Varal','Tábua de roupas'
 ]);
 
@@ -687,7 +719,7 @@ const TEST_INSTRUCTIONS={
   'Cofre':                    'Teste o funcionamento da trava e da senha.'
 };
 function mk(n,q=0){return{name:n,questions:q}}
-const COZ=[mk('Garfos'),mk('Facas'),mk('Colheres de sopa'),mk('Colheres de chá'),mk('Abridor de vinho e cerveja'),mk('Colheres para cozinhar'),mk('Pegador de macarrão'),mk('Facas de corte'),mk('Peneira'),mk('Tábua de vidro ou plástico'),mk('Pratos rasos'),mk('Pratos de sobremesa'),mk('Copos de vidro'),mk('Taças de vinho'),mk('Xícaras'),mk('Panelas'),mk('Frigideira'),mk('Pano de prato'),mk('Torneira cozinha',1),mk('Escorredor de louça'),mk('Lixeira de pia'),mk('Lixeira de lixo seco'),mk('Jarra de água'),mk('Liquidificador'),mk('Chaleira'),mk('Sanduicheira'),mk('Cafeteira',1),mk('Microondas'),mk('Airfryer'),mk('Lava louça'),mk('Geladeira'),mk('Freezer (congelador)'),mk('Fogão',1),mk('Forno'),mk('Forma de alumínio'),mk('Janelas',1),mk('Cortina',1),mk('Lâmpadas'),mk('Interruptores/tomadas'),mk('Piso'),mk('Parede'),mk('Teto'),mk('Porta',1)];
+const COZ=[mk('Garfos'),mk('Facas'),mk('Colheres de sopa'),mk('Colheres de chá'),mk('Abridor de vinho e cerveja'),mk('Colheres para cozinhar'),mk('Pegador de macarrão'),mk('Facas de corte'),mk('Peneira'),mk('Tábua de vidro ou plástico'),mk('Pratos grandes'),mk('Pratos fundos'),mk('Pratos de sobremesa'),mk('Copos de vidro'),mk('Taças de vinho'),mk('Xícaras'),mk('Panelas'),mk('Frigideira'),mk('Pano de prato'),mk('Torneira cozinha',1),mk('Escorredor de louça'),mk('Lixeira de pia'),mk('Lixeira de lixo seco'),mk('Jarra de água'),mk('Liquidificador'),mk('Chaleira'),mk('Sanduicheira'),mk('Cafeteira',1),mk('Microondas'),mk('Airfryer'),mk('Lava louça'),mk('Geladeira'),mk('Freezer (congelador)'),mk('Fogão',1),mk('Forno'),mk('Forma de alumínio'),mk('Janelas',1),mk('Cortina',1),mk('Lâmpadas'),mk('Interruptores/tomadas'),mk('Piso'),mk('Parede'),mk('Teto'),mk('Porta',1)];
 const BATH=[mk('Chuveiro',1),mk('Ralo'),mk('Janelas',1),mk('Cortina',1),mk('Box'),mk('Vaso sanitário',1),mk('Bidê',1),mk('Ducha higiênica',1),mk('Banheira (privativa)',1),mk('Lixeira'),mk('Escova sanitária'),mk('Exaustor'),mk('Torneira',1),mk('Espelho'),mk('Secador de cabelo'),mk('Itens de higiene pessoal',1),mk('Lâmpadas'),mk('Interruptores/tomadas'),mk('Piso'),mk('Parede'),mk('Teto'),mk('Porta',1)];
 const Q1=[mk('Cama',1),mk('Colchão',1),mk('Travesseiros'),mk('Arara para roupas'),mk('Armário'),mk('Cabides'),mk('Televisão',1),mk('Controle da televisão'),mk('Ventilador',1),mk('Ar condicionado',1),mk('Controle do ar condicionado'),mk('Berço'),mk('Janelas',1),mk('Tela de proteção'),mk('Cortina',1),mk('Lâmpadas'),mk('Interruptores/tomadas'),mk('Piso'),mk('Parede'),mk('Teto'),mk('Porta',1)];
 const GERAL=[mk('Interfone'),mk('Modem de internet'),mk('Wi-fi'),mk('Capacidade de hóspedes'),mk('Itens pessoais do proprietário'),mk('Enxoval'),mk('Tour pelo imóvel'),mk('Quadro de luz'),mk('Chaves'),mk('Varanda/Sacada'),mk('Kit Churrasco',1),mk('Voltagem',1),mk('Cofre'),mk('Frigobar/Cervejeira/Adega'),mk('Pin de localização')];
@@ -742,10 +774,48 @@ const SpeechRec=null; // reconhecimento de voz DESATIVADO — tudo por clique (a
 
 // ── HELPERS ───────────────────────────────────────────────────
 function curEnv(){return S.tpl.environments[S.envIdx]}
-function curItem(){return curEnv().items[S.itemIdx]}
+function curUnit(){const e=curEnv();return e&&e._units?e._units[S.itemIdx]:null}
+function curItem(){const u=curUnit();return u?u.items[0]:(curEnv()?curEnv().items[0]:null)}
 function totalItems(){return S.tpl.environments.reduce((s,e)=>s+e.items.length,0)}
 function doneItems(){return S.results.filter(r=>!r.custom).length}
-function expQty(name){return(!S.guests||!PER_GUEST.has(name))?1:S.guests}
+// quantidade esperada: fixa (panelas), por hóspede, ou 1
+const FIXED_QTY={'Panelas':3,'Frigideira':1};
+function expQty(name){if(FIXED_QTY[name])return FIXED_QTY[name];return(!S.guests||!PER_GUEST.has(name))?1:S.guests}
+
+// ── GRUPOS DE ITENS (1 foto cobre o grupo; cada item marcado Bom/Ruim/Ausente) ──
+const ITEM_GROUPS=[
+  {id:'talheres', title:'Talheres', items:['Garfos','Facas','Colheres de sopa','Colheres de chá','Facas de corte']},
+  {id:'copos', title:'Copos, xícaras e taças', items:['Copos de vidro','Xícaras','Taças de vinho']},
+  {id:'pratos', title:'Pratos', items:['Pratos grandes','Pratos fundos','Pratos de sobremesa']},
+  {id:'preparo', title:'Preparo (tábua, peneira, escorredor)', items:['Tábua de vidro ou plástico','Peneira','Escorredor de louça']},
+  {id:'utens', title:'Utensílios de cozinha', items:['Abridor de vinho e cerveja','Pegador de macarrão','Pano de prato','Colheres para cozinhar']},
+  {id:'panelas', title:'Panelas e frigideira', items:['Panelas','Frigideira']},
+  {id:'outros_coz', title:'Outros da cozinha', items:['Jarra de água','Lixeira de pia','Lixeira de lixo seco','Forma de alumínio']},
+  {id:'tv', title:'Televisão + Controle', items:['Televisão','Controle da televisão']},
+  {id:'ar', title:'Ar-condicionado + Controle', items:['Ar condicionado','Controle do ar condicionado']},
+  {id:'acab', title:'Acabamento (piso, parede, teto)', items:['Piso','Parede','Teto','Quarto - Piso','Quarto - Parede','Quarto - Teto','Banheiro - Piso','Banheiro - Parede','Banheiro - Teto']},
+  {id:'eletrica', title:'Elétrica (lâmpadas e tomadas)', items:['Lâmpadas','Interruptores/tomadas','Quarto - Lâmpadas','Quarto - Interruptores/tomadas','Banheiro - Lâmpadas','Banheiro - Interruptores/tomadas']},
+  {id:'aberturas', title:'Janelas e cortina', items:['Janelas','Cortina','Tela de proteção','Quarto - Janelas','Quarto - Cortina','Banheiro - Janelas','Banheiro - Cortina']},
+  {id:'sanitarios', title:'Vaso, bidê e ducha', items:['Vaso sanitário','Bidê','Ducha higiênica']},
+  {id:'banho', title:'Chuveiro e box', items:['Chuveiro','Box']},
+  {id:'pia_banho', title:'Torneira e espelho', items:['Torneira','Espelho']},
+];
+const _itemToGroup={};
+ITEM_GROUPS.forEach(g=>g.items.forEach(n=>{_itemToGroup[n]=g;}));
+function groupOf(name){return _itemToGroup[name]||null;}
+function buildUnits(items){
+  const units=[],handled=new Set();
+  items.forEach(it=>{
+    if(handled.has(it.name)) return;
+    const g=groupOf(it.name);
+    if(g){
+      const members=items.filter(x=>g.items.includes(x.name)&&!handled.has(x.name));
+      members.forEach(m=>handled.add(m.name));
+      units.push(members.length>1?{type:'group',group:g,items:members}:{type:'item',items:members});
+    } else { handled.add(it.name); units.push({type:'item',items:[it]}); }
+  });
+  return units;
+}
 function isStruct(name){return STRUCTURAL.has(name)||/^(Piso|Parede|Teto|Porta|Janela|Cortina|Lâmpada|Interruptor|Ralo|Box|Exaust|Lareira|Guarda|Interfone|Modem|Wi-fi|Quadro|Voltag|Pin|Tour|Capacidade|Itens pessoais)/i.test(name)}
 
 // ── AVATAR DA MONICA ──────────────────────────────────────────
@@ -1429,31 +1499,14 @@ function startFromEnv(idx){
 }
 
 function _beginEnv(idx){
-  // Verificar se este ambiente tem utensílios para foto em lote
   const env=S.tpl.environments[idx];
-  const batchCount=env.items.filter(i=>BATCH_ITEMS.has(i.name)).length;
-  if(batchCount>=3&&!S.batchDone[env.name]){
-    document.getElementById('fab').classList.remove('visible');
-    S.envIdx=idx;S.itemIdx=0;
-    startBatchCapture();return;
-  }
-  document.getElementById('fab').classList.add('visible');
-  show('s-inspect');
-  renderItem();
-
-  if(idx===0){
-    const env=curEnv().name;
-    const abre = S.mode==='revisao'
-      ? `Bora resolver as pendências — começando pelo ${env}.`
-      : `Beleza! A gente começa pelo ${env}.`;
-    ia(abre,()=>{
-      ia(itemPrompt(curItem().name),()=>{if(SpeechRec) startListening();});
-    });
-  } else {
-    ia(envIntro(curEnv().name),()=>{
-      ia(itemPrompt(curItem().name),()=>{if(SpeechRec) startListening();});
-    });
-  }
+  S.envIdx=idx; S.itemIdx=0;
+  env._units=buildUnits(env.items);   // agrupa itens (grupos compartilham foto)
+  renderUnit();
+  const abre = idx===0
+    ? (S.mode==='revisao'?`Bora resolver as pendências — começando pelo ${env.name}.`:`Beleza! A gente começa pelo ${env.name}.`)
+    : envIntro(env.name);
+  ia(abre,()=>{ speakUnit(); });
 }
 
 // ── SCRIPTS NO TOM DA MONICA ──────────────────────────────────
@@ -1560,7 +1613,7 @@ function renderItem(){
   const env=curEnv(), item=curItem();
   const pct=(doneItems()/totalItems()*100).toFixed(0);
   document.getElementById('ip-env-lbl').textContent=`Ambiente ${S.envIdx+1} de ${S.tpl.environments.length}`;
-  document.getElementById('ip-item-cnt').textContent=`${S.itemIdx+1} / ${env.items.length}`;
+  document.getElementById('ip-item-cnt').textContent=`${S.itemIdx+1} / ${(env._units||env.items).length}`;
   document.getElementById('ip-fill').style.width=pct+'%';
   document.getElementById('ip-env-name').textContent=env.name;
 
@@ -1720,6 +1773,91 @@ function specToNote(itemName){
   return Object.values(s).join(' · ');
 }
 
+// ── NAVEGAÇÃO POR UNIDADES (item OU grupo) ────────────────────
+function renderUnit(){
+  const u=curUnit();
+  if(!u){showEnvDone();return;}
+  if(u.type==='group'){ renderGroup(u); }
+  else { document.getElementById('fab').classList.add('visible'); show('s-inspect'); renderItem(); }
+}
+function groupIntro(group){ return `Agora ${group.title}. Dá pra registrar numa foto só — e marca cada um: bom, ruim ou ausente.`; }
+function speakUnit(prefix){
+  const u=curUnit(); if(!u) return;
+  const txt = u.type==='group' ? groupIntro(u.group) : itemPrompt(u.items[0].name);
+  ia((prefix?prefix+' ':'')+txt);
+}
+
+// ── TELA DE GRUPO ──────────────────────────────────────────────
+let _groupPhotoCount=0;
+function renderGroup(unit){
+  document.getElementById('fab').classList.remove('visible');
+  show('s-group');
+  S._groupUnit=unit; S.groupStatus={}; S.groupQty={}; _groupPhotoCount=0;
+  document.getElementById('grp-env-lbl').textContent=`Ambiente ${S.envIdx+1} de ${S.tpl.environments.length}`;
+  document.getElementById('grp-env-name').textContent=curEnv().name;
+  document.getElementById('grp-title').textContent=unit.group.title;
+  document.getElementById('grp-foto-grid').innerHTML='';
+  const fb=document.getElementById('grp-btn-foto'); fb.textContent='📷 Tirar foto'; fb.classList.add('required');
+  buildGroupRows();
+}
+function buildGroupRows(){
+  const wrap=document.getElementById('grp-items'); wrap.innerHTML='';
+  S._groupUnit.items.forEach((it,i)=>{
+    const exp=expQty(it.name);
+    const hasQty=exp>1||!!FIXED_QTY[it.name];
+    const st=S.groupStatus[i];
+    const qv=S.groupQty[i]!=null?S.groupQty[i]:exp;
+    const row=document.createElement('div'); row.className='grp-row';
+    row.innerHTML=
+      `<div class="grp-row-top">
+        <span class="grp-check ${st?(st==='ausente'?'x':'v'):''}">${st?(st==='ausente'?'✗':'✓'):'•'}</span>
+        <span class="grp-name">${it.name}</span>
+        ${hasQty?`<input class="grp-qty" type="number" inputmode="numeric" min="0" value="${qv}" oninput="setGroupQty(${i},this.value)">`:''}
+      </div>
+      <div class="grp-status">
+        <button type="button" class="grp-st ok${st==='ok'?' on':''}" onclick="setGroupStatus(${i},'ok')">Bom</button>
+        <button type="button" class="grp-st ressalva${st==='ressalva'?' on':''}" onclick="setGroupStatus(${i},'ressalva')">Ruim</button>
+        <button type="button" class="grp-st ausente${st==='ausente'?' on':''}" onclick="setGroupStatus(${i},'ausente')">Ausente</button>
+      </div>`;
+    wrap.appendChild(row);
+  });
+  updateGroupNext();
+}
+function setGroupStatus(i,status){ S.groupStatus[i]=status; buildGroupRows(); }
+function setGroupQty(i,v){ let n=parseInt(v,10); if(isNaN(n)||n<0)n=0; S.groupQty[i]=n; }
+function updateGroupNext(){ const all=S._groupUnit.items.every((it,i)=>S.groupStatus[i]); const btn=document.getElementById('grp-next'); if(btn) btn.disabled=!all; }
+async function onGroupPhoto(e){
+  const file=e.target.files[0]; if(!file) return; e.target.value='';
+  const url=URL.createObjectURL(file);
+  const div=document.createElement('div'); div.className='foto-thumb'; div.innerHTML=`<img src="${url}"/><div class="foto-badge synced">✓</div>`;
+  document.getElementById('grp-foto-grid').appendChild(div);
+  const blob=await compressImage(file);
+  await savePhoto(blob,{env:curEnv().name,item:'grp:'+S._groupUnit.group.id});
+  _groupPhotoCount++;
+  const fb=document.getElementById('grp-btn-foto'); fb.textContent='📷 Adicionar outra foto'; fb.classList.remove('required');
+  ia('Foto do grupo registrada. Marca cada item e toca em próximo.');
+}
+function confirmGroup(){
+  const items=S._groupUnit.items;
+  if(!items.every((it,i)=>S.groupStatus[i])){ silenceMonica(); ia('Marca a condição de cada item — bom, ruim ou ausente — antes de continuar.'); return; }
+  const anyPresent=items.some((it,i)=>S.groupStatus[i]!=='ausente');
+  if(anyPresent && _groupPhotoCount===0){ silenceMonica(); ia('Falta a foto do grupo. Tira pelo menos uma pra registrar.'); document.getElementById('grp-btn-foto').classList.add('required'); return; }
+  items.forEach((it,i)=>{
+    const status=S.groupStatus[i];
+    const exp=expQty(it.name);
+    const hasQty=exp>1||!!FIXED_QTY[it.name];
+    let qty=status==='ausente'?0:(hasQty?(S.groupQty[i]!=null?S.groupQty[i]:exp):1);
+    const lowQty=!isStruct(it.name)&&qty<exp&&status==='ok';
+    const finalStatus=lowQty?'ressalva':status;
+    S.results.push({env:curEnv().name,item:it.name,status:finalStatus,note:lowQty?`Abaixo do esperado (${exp})`:'',qty,expectedQty:exp,custom:false,lowQty});
+    addTimeline(it.name,finalStatus,'',qty,exp);
+  });
+  saveResults(S.prop,S.results);
+  S.itemIdx++;
+  if(!curUnit()){ ia('Boa, grupo registrado!',()=>showEnvDone()); }
+  else { renderUnit(); speakUnit('Boa!'); }
+}
+
 function mark(status){
   if(S.pendingAdvance) return;
 
@@ -1767,21 +1905,11 @@ function mark(status){
   addTimeline(item.name,finalStatus,note,S.currentQty,exp);
 
   const affirm=quickAffirm(finalStatus);
-  const isLast=S.itemIdx+1>=curEnv().items.length;
-
   stopListening();
   setTimeout(()=>{
-    S.itemIdx++;
-    if(S.itemIdx>=curEnv().items.length){
-      ia(affirm,()=>showEnvDone());
-    } else {
-      renderItem();
-      const next=curItem().name;
-      // confirmação rápida + próximo item em sequência
-      ia(`${affirm} ${next}`,()=>{
-        if(SpeechRec) startListening();
-      });
-    }
+    S.itemIdx++;   // avança de UNIDADE
+    if(!curUnit()){ ia(affirm,()=>showEnvDone()); }
+    else { renderUnit(); speakUnit(affirm); }
   },300);
 }
 
@@ -1960,12 +2088,10 @@ function nextEnv(){
   }
   S.envIdx++; S.itemIdx=0;
   document.getElementById('timeline').innerHTML='';
+  const env=curEnv(); env._units=buildUnits(env.items);
   buildEnvList();
-  renderItem();
-  ia(envIntro(curEnv().name),()=>{
-    ia(itemPrompt(curItem().name));
-    if(SpeechRec) startListening();
-  });
+  renderUnit();
+  ia(envIntro(env.name),()=>{ speakUnit(); });
 }
 
 function addTimeline(name,status,note,qty,exp){
@@ -2367,8 +2493,9 @@ async function buildReportHTML(){
     const envIssues=items.filter(i=>i.status!=='ok').length;
     const summaryColor=envIssues>0?'#FF8904':'#059669';
     const gridItems=items.map(it=>{
-      const key=`${env}||${it.item}`;
-      const fotos=(fotoMap[key]||[]);
+      const _g=(typeof groupOf==='function')?groupOf(it.item):null;
+      let fotos = _g ? (fotoMap[`${env}||grp:${_g.id}`]||[]) : [];
+      if(!fotos.length) fotos = fotoMap[`${env}||${it.item}`]||[];
       const isPinLoc=it.item==='Pin de localização'&&it.note&&it.note.includes('google.com/maps');
       const condCap=`<span style="position:absolute;left:4px;bottom:4px;background:${sColor[it.status]};color:#fff;font-size:9px;font-weight:700;border-radius:4px;padding:1px 6px;box-shadow:0 1px 3px rgba(0,0,0,.3)">${sIcon[it.status]} ${sLabel[it.status]}</span>`;
       const fotoHtml=fotos.length
