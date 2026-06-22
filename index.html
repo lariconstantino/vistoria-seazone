@@ -191,6 +191,29 @@ body{
 .intro-placeholder-icon{width:150px;height:168px;border-radius:14px;background:#000;border:1px solid rgba(0,85,255,.12);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;transition:box-shadow .3s ease}
 .intro-placeholder-icon video{width:100%;height:100%;object-fit:cover;display:block}
 .intro-placeholder-icon.speaking{box-shadow:0 0 0 3px #0055FF,0 0 18px rgba(0,85,255,.28)}
+/* seleção de ambientes */
+.env-pick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.env-pick{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 10px;border:2px solid var(--border);border-radius:14px;background:#fff;cursor:pointer;transition:border-color .15s,background .15s,transform .08s;font-family:var(--font);-webkit-tap-highlight-color:transparent}
+.env-pick:active{transform:scale(.97)}
+.env-pick.on{border-color:var(--blue);background:var(--blue-lt)}
+.env-pick-emoji{font-size:26px;line-height:1}
+.env-pick-label{font-size:14px;font-weight:700;color:var(--navy)}
+.env-pick.on .env-pick-label{color:var(--blue)}
+.env-pick-badge{position:absolute;top:-9px;right:-9px;min-width:24px;height:24px;border-radius:12px;background:var(--blue);color:#fff;font-size:13px;font-weight:800;display:none;align-items:center;justify-content:center;padding:0 6px;box-shadow:0 2px 6px rgba(0,85,255,.4)}
+.env-pick.on .env-pick-badge{display:flex}
+.env-pick-minus{position:absolute;top:-9px;left:-9px;width:24px;height:24px;border-radius:12px;background:#fff;border:1.5px solid var(--blue);color:var(--blue);font-size:18px;font-weight:800;display:none;align-items:center;justify-content:center;line-height:1;padding:0}
+.env-pick.on .env-pick-minus{display:flex}
+.env-pick-hint{font-size:10px;color:var(--muted);font-weight:600}
+.env-pick.on .env-pick-hint{display:none}
+/* travas de especificação (cama/sofá) */
+.spec-wrap{display:none;flex-direction:column;gap:12px;background:var(--blue-lt);border:1.5px solid var(--blue-100);border-radius:12px;padding:14px}
+.spec-wrap.spec-required{border-color:#FF8904;background:#FFF7ED}
+.spec-intro{font-size:13px;font-weight:700;color:var(--navy);line-height:1.4}
+.spec-q-lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.spec-chips{display:flex;gap:8px;flex-wrap:wrap}
+.spec-chip{flex:1;min-width:70px;padding:11px 8px;border:1.5px solid var(--border);border-radius:10px;background:#fff;font-family:var(--font);font-size:14px;font-weight:700;color:var(--navy);cursor:pointer;transition:border-color .12s,background .12s,color .12s;-webkit-tap-highlight-color:transparent}
+.spec-chip.on{border-color:var(--blue);background:var(--blue);color:#fff}
+.spec-help{background:transparent;border:1.5px dashed var(--blue-100);border-radius:10px;padding:10px;font-family:var(--font);font-size:13px;font-weight:600;color:var(--blue);cursor:pointer}
 .intro-placeholder-name{font-size:18px;font-weight:700;color:var(--foreground);letter-spacing:-.3px}
 .intro-placeholder-role{font-size:12px;color:var(--muted-foreground);letter-spacing:.06em;text-transform:uppercase}
 .intro-voice-bars{display:flex;align-items:center;gap:3px;height:28px;margin:4px 0}
@@ -334,7 +357,7 @@ body{
 <!-- PROPERTY DISCOVERY -->
 <div id="s-property-desc" class="screen">
   <div class="intro-placeholder">
-    <div class="intro-placeholder-icon" data-avatar><video autoplay loop muted playsinline src="monica.mp4"></video></div>
+    <div class="intro-placeholder-icon" data-avatar><video loop muted playsinline preload="auto" src="monica.mp4"></video></div>
     <div class="intro-voice-bars" id="pd-bars">
       <div class="ivbar" id="pb0"></div><div class="ivbar" id="pb1"></div>
       <div class="ivbar" id="pb2"></div><div class="ivbar" id="pb3"></div>
@@ -345,46 +368,21 @@ body{
     <div class="small" style="color:var(--muted);text-align:center;padding:0 8px;line-height:1.5" id="pd-speech-text">Preparando…</div>
   </div>
 
-  <!-- Colinha de exemplo -->
-  <div class="card" style="gap:10px;background:var(--blue-lt);border-color:var(--blue-100)">
-    <div class="label" style="color:var(--blue)">💡 Fale algo assim</div>
-    <div style="background:#fff;border-radius:8px;padding:10px 12px;font-size:13px;color:var(--navy);font-style:italic;line-height:1.6;border:1px solid var(--border)">
-      "Tem dois quartos, sala, cozinha, banheiro e área de serviço"
-    </div>
-    <div style="display:flex;flex-wrap:wrap;gap:5px">
-      <span style="background:#fff;border:1px solid var(--border);border-radius:var(--rfull);padding:3px 10px;font-size:11px;font-weight:600;color:var(--muted)">quarto</span>
-      <span style="background:#fff;border:1px solid var(--border);border-radius:var(--rfull);padding:3px 10px;font-size:11px;font-weight:600;color:var(--muted)">suíte</span>
-      <span style="background:#fff;border:1px solid var(--border);border-radius:var(--rfull);padding:3px 10px;font-size:11px;font-weight:600;color:var(--muted)">sala</span>
-      <span style="background:#fff;border:1px solid var(--border);border-radius:var(--rfull);padding:3px 10px;font-size:11px;font-weight:600;color:var(--muted)">cozinha</span>
-      <span style="background:#fff;border:1px solid var(--border);border-radius:var(--rfull);padding:3px 10px;font-size:11px;font-weight:600;color:var(--muted)">banheiro</span>
-      <span style="background:#fff;border:1px solid var(--border);border-radius:var(--rfull);padding:3px 10px;font-size:11px;font-weight:600;color:var(--muted)">lavabo</span>
-      <span style="background:#fff;border:1px solid var(--border);border-radius:var(--rfull);padding:3px 10px;font-size:11px;font-weight:600;color:var(--muted)">área de serviço</span>
-      <span style="background:#fff;border:1px solid var(--border);border-radius:var(--rfull);padding:3px 10px;font-size:11px;font-weight:600;color:var(--muted)">varanda</span>
-    </div>
+  <div class="card" style="gap:6px;background:var(--blue-lt);border-color:var(--blue-100)">
+    <div class="label" style="color:var(--blue)">👆 Toque nos ambientes que o imóvel tem</div>
+    <div style="font-size:12px;color:var(--navy);line-height:1.5">Tem mais de um? É só tocar de novo — ex: <b>2 quartos</b>, toca duas vezes. O <b>−</b> tira um.</div>
   </div>
 
-  <div class="card" id="pd-envs-card" style="display:none">
-    <div class="label">Ambientes detectados</div>
-    <div id="pd-envs-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px"></div>
-  </div>
+  <div class="env-pick-grid" id="env-pick-grid"></div>
 
-  <div class="sonar-wrap" id="pd-sonar">
-    <div class="sonar-rings">
-      <div class="sonar-ring"></div><div class="sonar-ring"></div><div class="sonar-ring"></div>
-    </div>
-    <button class="mic-btn" id="pd-mic" onclick="togglePdListen()">🎤</button>
-    <div class="voice-status" id="pd-status">Aguardando Monica…</div>
-    <div class="voice-transcript" id="pd-transcript"></div>
-  </div>
-
-  <button class="btn btn-primary" id="pd-confirm-btn" onclick="confirmPropertyDesc()" style="display:none">▶ Isso! Pode começar</button>
+  <button class="btn btn-primary" id="pd-confirm-btn" onclick="confirmPropertyDesc()">▶ Pronto, pode começar</button>
 </div>
 
 <!-- INTRO -->
 <div id="s-intro" class="screen">
 
   <div class="intro-placeholder">
-    <div class="intro-placeholder-icon" data-avatar><video autoplay loop muted playsinline src="monica.mp4"></video></div>
+    <div class="intro-placeholder-icon" data-avatar><video loop muted playsinline preload="auto" src="monica.mp4"></video></div>
     <!-- Barras de voz -->
     <div class="intro-voice-bars" id="intro-bars">
       <div class="ivbar" id="ib0"></div><div class="ivbar" id="ib1"></div>
@@ -435,6 +433,8 @@ body{
     <div id="ip-mandatory-badge" class="mandatory-badge" style="display:none">⭐ Item obrigatório para ativação</div>
     <div id="ip-cat-badge" style="display:none"></div>
     <div id="ip-instruction" class="item-instruction" style="display:none"></div>
+
+    <div class="spec-wrap" id="spec-wrap"></div>
 
     <div id="qty-wrap">
       <div class="qty-section">
@@ -699,7 +699,7 @@ const S={
   listening:false, recognition:null,
   iaSpeaking:false, pendingAdvance:false,
   currentNote:'', currentItemHasPhoto:false,
-  mode:'entrada', prevResults:[], batchDone:{}, currentLocCoords:null
+  mode:'entrada', prevResults:[], batchDone:{}, currentLocCoords:null, currentSpec:{}
 };
 const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
 
@@ -720,6 +720,7 @@ function initMonicaAvatars(){ /* SVG já está no HTML — nada a fazer */ }
 const ELEVEN_API_KEY  = 'sk_360639b0530d505a2d486ac251f96f016c4d1831d2ff2f62';
 const MONICA_VOICE_ID = '9FdNXU6Ju6062J29ADKr';
 
+let currentAudio=null;
 async function speakElevenLabs(text){
   if(!ELEVEN_API_KEY||!MONICA_VOICE_ID) return false;
   try{
@@ -737,11 +738,14 @@ async function speakElevenLabs(text){
     const url=URL.createObjectURL(blob);
     return new Promise(res=>{
       const a=new Audio(url);
-      a.onended=()=>{URL.revokeObjectURL(url);res(true);};
-      a.onerror=()=>{URL.revokeObjectURL(url);res(false);};
-      a.play().catch(()=>res(false));
+      currentAudio=a;
+      // vídeo só começa quando o áudio realmente toca → sincronizado
+      a.onplay =()=>startAvatarTalk();
+      a.onended=()=>{stopAvatarTalk();URL.revokeObjectURL(url);if(currentAudio===a)currentAudio=null;res(true);};
+      a.onerror=()=>{stopAvatarTalk();URL.revokeObjectURL(url);if(currentAudio===a)currentAudio=null;res(false);};
+      a.play().catch(()=>{stopAvatarTalk();res(false);});
     });
-  }catch{return false;}
+  }catch{stopAvatarTalk();return false;}
 }
 
 // ── VOZ FALLBACK (navegador) ───────────────────────────────────
@@ -757,10 +761,34 @@ function loadVoices(){
 window.speechSynthesis.addEventListener('voiceschanged',loadVoices);
 loadVoices();
 initMonicaAvatars();
+// Avatar fica parado (1º frame) até a Monica falar. Sincroniza vídeo ↔ áudio.
+function startAvatarTalk(){
+  document.querySelectorAll('[data-avatar]').forEach(a=>a.classList.add('speaking'));
+  document.querySelectorAll('[data-avatar] video').forEach(v=>{
+    try{v.currentTime=0;}catch{}
+    v.playbackRate=1;
+    v.play().catch(()=>{});
+  });
+}
+function stopAvatarTalk(){
+  document.querySelectorAll('[data-avatar]').forEach(a=>a.classList.remove('speaking'));
+  document.querySelectorAll('[data-avatar] video').forEach(v=>{
+    v.pause();
+    try{v.currentTime=0;}catch{}
+  });
+}
+// para qualquer fala em andamento (ElevenLabs + navegador) e congela o avatar
+function silenceMonica(){
+  try{if(currentAudio){currentAudio.pause();currentAudio=null;}}catch{}
+  window.speechSynthesis.cancel();
+  speechQueue=[];speaking=false;
+  stopAvatarTalk();
+}
+// garante 1º frame visível sem reprodução automática
 document.querySelectorAll('[data-avatar] video').forEach(v=>{
-  const idle=()=>{if(!S.iaSpeaking){v.playbackRate=0.15;}};
-  idle();
-  v.addEventListener('canplay',idle);
+  const freeze=()=>{if(!S.iaSpeaking){v.pause();try{v.currentTime=0;}catch{}}};
+  v.addEventListener('loadeddata',freeze);
+  v.addEventListener('loadedmetadata',freeze);
 });
 
 // ── ENGINE DE VOZ ──────────────────────────────────────────────
@@ -791,8 +819,9 @@ async function processQueue(){
   const u=new SpeechSynthesisUtterance(text);
   u.lang='pt-BR'; u.rate=0.88; u.pitch=1.08;
   if(monicaVoice) u.voice=monicaVoice;
-  u.onend=()=>{if(onDone) onDone();setTimeout(processQueue,600);};
-  u.onerror=()=>{setTimeout(processQueue,600);};
+  u.onstart=()=>startAvatarTalk();
+  u.onend=()=>{stopAvatarTalk();if(onDone) onDone();setTimeout(processQueue,600);};
+  u.onerror=()=>{stopAvatarTalk();setTimeout(processQueue,600);};
   window.speechSynthesis.speak(u);
 }
 
@@ -803,11 +832,8 @@ function setIaUI(active, text=''){
   el.classList.toggle('active', active);
   if(txt&&text) txt.textContent=text.length>60?text.slice(0,57)+'…':text;
   S.iaSpeaking=active;
-  document.querySelectorAll('[data-avatar]').forEach(a=>a.classList.toggle('speaking',active));
-  document.querySelectorAll('[data-avatar] video').forEach(v=>{
-    if(active){v.play().catch(()=>{});v.playbackRate=1;}
-    else{v.playbackRate=0.15;}
-  });
+  // o play/pause do vídeo é controlado por startAvatarTalk/stopAvatarTalk (sincronizado ao áudio)
+  if(!active) stopAvatarTalk();
 }
 
 // ── SCRIPTS NO TOM DA MONICA ──────────────────────────────────
@@ -832,8 +858,9 @@ function envIntro(envName){
 function itemPrompt(itemName){
   const instruction=TEST_INSTRUCTIONS[itemName];
   const mandAviso=MANDATORY_ITEMS.has(itemName)?' Item obrigatório pra ativação.':'';
-  if(instruction) return `${itemName}.${mandAviso} ${instruction}`;
-  return itemName+(mandAviso?'.'+mandAviso:'');
+  const specAsk=(typeof ITEM_SPECS!=='undefined'&&ITEM_SPECS[itemName])?' '+ITEM_SPECS[itemName].prompt:'';
+  if(instruction) return `${itemName}.${mandAviso} ${instruction}${specAsk}`;
+  return itemName+(mandAviso?'.'+mandAviso:'')+specAsk;
 }
 
 function itemCategoryLabel(name){
@@ -1084,7 +1111,7 @@ const ENV_DETECT=[
 function getEnvItems(n){
   const l=n.toLowerCase();
   if(l.startsWith('quarto')||l.startsWith('suíte')||l.startsWith('suite')) return Q1;
-  if(l==='sala') return [mk('Sofá',1),mk('Televisão',1),mk('Controle da televisão'),mk('Ventilador',1),mk('Ar condicionado',1),mk('Controle do ar condicionado'),mk('Lareira interna'),mk('Janelas',1),mk('Cortina',1),mk('Lâmpadas'),mk('Interruptores/tomadas'),mk('Piso'),mk('Parede'),mk('Teto'),mk('Porta',1),mk('Mesa e cadeiras'),mk('Itens decorativos')];
+  if(l.startsWith('sala')) return [mk('Sofá',1),mk('Televisão',1),mk('Controle da televisão'),mk('Ventilador',1),mk('Ar condicionado',1),mk('Controle do ar condicionado'),mk('Lareira interna'),mk('Janelas',1),mk('Cortina',1),mk('Lâmpadas'),mk('Interruptores/tomadas'),mk('Piso'),mk('Parede'),mk('Teto'),mk('Porta',1),mk('Mesa e cadeiras'),mk('Itens decorativos')];
   if(l.includes('cozinha')) return COZ;
   if(l.includes('área de serviço')||l.includes('lavanderia')) return [mk('Torneira área de serviço',2),mk('Máquina de lavar',1),mk('Secadora'),mk('Tábua de roupas'),mk('Varal'),mk('Vassoura'),mk('Rodo'),mk('Pá de lixo'),mk('Balde'),mk('Ferro de passar'),mk('Lâmpadas'),mk('Interruptores/tomadas'),mk('Piso'),mk('Parede'),mk('Teto'),mk('Porta',1),mk('Janela',1)];
   if(l.includes('banheiro')||l.includes('lavab')) return BATH;
@@ -1152,29 +1179,77 @@ function startPdListen(){
 function stopPdListen(){_pdListening=false;if(_pdRec){_pdRec.abort();_pdRec=null;}document.getElementById('pd-sonar').classList.remove('listening');}
 function togglePdListen(){if(_pdListening)stopPdListen();else startPdListen();}
 
+// Ambientes que um imóvel pode ter — base para a seleção visual
+const ENV_CATALOG=[
+  {key:'Quarto',          emoji:'🛏️', label:'Quarto'},
+  {key:'Suíte',           emoji:'🛌', label:'Suíte'},
+  {key:'Sala',            emoji:'🛋️', label:'Sala'},
+  {key:'Cozinha',         emoji:'🍳', label:'Cozinha'},
+  {key:'Banheiro',        emoji:'🚿', label:'Banheiro'},
+  {key:'Lavabo',          emoji:'🚽', label:'Lavabo'},
+  {key:'Área de Serviço', emoji:'🧺', label:'Área de serviço'},
+  {key:'Varanda',         emoji:'🌅', label:'Varanda'},
+];
+let _envCounts={};
+
+function buildEnvPickGrid(){
+  const grid=document.getElementById('env-pick-grid');
+  grid.innerHTML='';
+  ENV_CATALOG.forEach(c=>{
+    const n=_envCounts[c.key]||0;
+    const card=document.createElement('button');
+    card.type='button';
+    card.className='env-pick'+(n>0?' on':'');
+    card.dataset.key=c.key;
+    card.innerHTML=`
+      <span class="env-pick-emoji">${c.emoji}</span>
+      <span class="env-pick-label">${c.label}</span>
+      <span class="env-pick-hint">toque para adicionar</span>
+      <span class="env-pick-minus">−</span>
+      <span class="env-pick-badge">${n}</span>`;
+    card.onclick=()=>changeEnvCount(c.key,+1);
+    card.querySelector('.env-pick-minus').onclick=ev=>{ev.stopPropagation();changeEnvCount(c.key,-1);};
+    grid.appendChild(card);
+  });
+}
+
+function changeEnvCount(key,delta){
+  const n=Math.max(0,(_envCounts[key]||0)+delta);
+  _envCounts[key]=n;
+  buildEnvPickGrid();
+}
+
 function startPropertyDiscovery(){
-  _pdEnvs=[];_pdListening=false;
+  _envCounts={};
   show('s-property-desc');
-  document.getElementById('pd-confirm-btn').style.display='none';
-  document.getElementById('pd-envs-card').style.display='none';
-  document.getElementById('pd-transcript').textContent='';
-  document.getElementById('pd-status').textContent='Aguardando Monica…';
-  const nome=S.name?` ${S.name.split(' ')[0]}`:'';
-  const q=`${S.name?S.name.split(' ')[0]+', a':'A'} gente vai mapear o imóvel ${S.prop} primeiro. Me conta como é — quantos quartos tem, tem suíte? Sala, cozinha, banheiro, área de serviço... Pode falar tudo de uma vez, né? Eu já vou anotando.`;
+  document.getElementById('fab').classList.remove('visible');
+  document.getElementById('pd-confirm-btn').style.display='block';
+  buildEnvPickGrid();
   const el=document.getElementById('pd-speech-text');el.textContent='';
+  const nome=S.name?S.name.split(' ')[0]:'';
+  const q=`${nome?nome+', a':'A'} gente vai montar o imóvel ${S.prop} agora. Toca nos ambientes que ele tem — quarto, suíte, sala, cozinha, banheiro, lavabo, área de serviço, varanda. Se tiver mais de um, toca de novo: dois quartos, toca duas vezes, né? Quando terminar, é só confirmar.`;
   startPdBars();
   const words=q.split(' ');let wi=0;
   const wt=setInterval(()=>{if(wi<words.length)el.textContent=words.slice(0,++wi).join(' ');else clearInterval(wt);},100);
-  ia(q,()=>{clearInterval(wt);el.textContent=q;stopPdBars();document.getElementById('pd-status').textContent='🎤 Pode falar!';if(SpeechRec)startPdListen();});
+  ia(q,()=>{clearInterval(wt);el.textContent=q;stopPdBars();});
 }
 
 function confirmPropertyDesc(){
-  stopPdListen();stopPdBars();
-  if(_pdEnvs.length===0){S.tpl=TEMPLATES.find(t=>t.name==='Entrada')||TEMPLATES[1];_beginEnv(0);return;}
-  if(!_pdEnvs.includes('Geral'))_pdEnvs.push('Geral');
-  S.tpl={id:'custom-'+Date.now(),name:'Vistoria Guiada',environments:_pdEnvs.map(name=>({name,items:getEnvItems(name)}))};
-  const envList=_pdEnvs.filter(e=>e!=='Geral').join(', ');
-  const resumo=`Show! Então a gente vai passar por: ${envList}, mais os itens gerais. Ficou incrível! Bora começar — vem comigo!`;
+  stopPdBars();
+  const envs=[];
+  ENV_CATALOG.forEach(c=>{
+    const n=_envCounts[c.key]||0;
+    for(let i=0;i<n;i++) envs.push(n>1?`${c.label} ${i+1}`:c.label);
+  });
+  if(!envs.length){
+    const el=document.getElementById('pd-speech-text');
+    el.textContent='Selecione pelo menos um ambiente pra começar 🙂';
+    return;
+  }
+  envs.push('Geral');
+  S.tpl={id:'custom-'+Date.now(),name:'Vistoria Guiada',environments:envs.map(name=>({name,items:getEnvItems(name)}))};
+  const envList=envs.filter(e=>e!=='Geral').join(', ');
+  const resumo=`Show! Então a gente vai passar por: ${envList}, mais os itens gerais. Bora começar — vem comigo!`;
   const el=document.getElementById('pd-speech-text');el.textContent=resumo;
   document.getElementById('pd-confirm-btn').style.display='none';
   startPdBars();
@@ -1259,7 +1334,11 @@ function _beginEnv(idx){
   renderItem();
 
   if(idx===0){
-    ia(greeting(),()=>{
+    const env=curEnv().name;
+    const abre = S.mode==='revisao'
+      ? `Bora resolver as pendências — começando pelo ${env}.`
+      : `Beleza! A gente começa pelo ${env}.`;
+    ia(abre,()=>{
       ia(itemPrompt(curItem().name),()=>{if(SpeechRec) startListening();});
     });
   } else {
@@ -1337,26 +1416,28 @@ function showIntro(){
         wrap.style.flexDirection='column';
         wrap.style.gap='10px';
 
-        let si=0;
-        function nextStep(){
-          if(si>=STEP_SCRIPTS.length){
-            document.getElementById('btn-intro-start').style.display='block';
-            return;
-          }
-          const {step,txt}=STEP_SCRIPTS[si++];
-          document.getElementById(step).classList.add('show');
-          startIntroBars();
-          ia(txt,()=>{ stopIntroBars(); setTimeout(nextStep,250); });
-        }
-        nextStep();
+        // revela os cards em cascata, sincronizado com o ritmo da fala (~55ms/caractere)
+        let acc=0;
+        STEP_SCRIPTS.forEach(s=>{
+          const d=acc;
+          setTimeout(()=>document.getElementById(s.step).classList.add('show'), d);
+          acc += Math.round(s.txt.length*55);
+        });
+
+        // narra os 3 passos numa única requisição → sem pausas entre eles
+        startIntroBars();
+        const full=STEP_SCRIPTS.map(s=>s.txt).join(' ');
+        ia(full,()=>{
+          stopIntroBars();
+          document.getElementById('btn-intro-start').style.display='block';
+        });
       },500);
     });
   },400);
 }
 
 function iniciarVistoriaAposIntro(){
-  window.speechSynthesis.cancel();
-  speechQueue=[];speaking=false;
+  silenceMonica();
   clearInterval(_wordTimer);
   stopIntroBars();
   if(S.mode==='entrada') startPropertyDiscovery();
@@ -1394,6 +1475,10 @@ function renderItem(){
   const instr=TEST_INSTRUCTIONS[item.name];
   if(instr){ instrEl.textContent=instr; instrEl.style.display='block'; }
   else { instrEl.style.display='none'; }
+
+  // Trava de especificação (cama/sofá)
+  S.currentSpec={};
+  renderItemSpecs(item.name);
 
   // Qty
   const qw=document.getElementById('qty-wrap');
@@ -1454,6 +1539,69 @@ function quickAffirm(status){
   const a=AFFIRM_OK[_affirmIdx%AFFIRM_OK.length];_affirmIdx++;return a;
 }
 
+// ── TRAVAS DE ESPECIFICAÇÃO (cama / sofá) ─────────────────────
+const ITEM_SPECS={
+  'Cama':{
+    prompt:'Essa cama é casal, queen ou king? Se tiver dúvida, toca em "tenho dúvida" que eu te ensino.',
+    intro:'Antes de marcar: essa cama é casal, queen ou king?',
+    questions:[{key:'Tamanho',options:['Casal','Queen','King']}],
+    help:'Pra medir sem fita é fácil, viu? Põe os travesseiros lado a lado em cima da cama. Se eles baterem certinho na largura, é casal. Se sobrar uns cinco a dez dedos, é queen. E se der pra encaixar quase três travesseiros, aí é king. Deu pra entender?'
+  },
+  'Sofá':{
+    prompt:'Esse sofá é sofá-cama? E ele é de casal ou de solteiro?',
+    intro:'Antes de marcar: esse sofá é sofá-cama? E é casal ou solteiro?',
+    questions:[
+      {key:'Sofá-cama',options:['Sim','Não']},
+      {key:'Tamanho',options:['Casal','Solteiro']}
+    ]
+  }
+};
+
+function renderItemSpecs(itemName){
+  const wrap=document.getElementById('spec-wrap');
+  const cfg=ITEM_SPECS[itemName];
+  if(!cfg){wrap.style.display='none';wrap.innerHTML='';return;}
+  wrap.classList.remove('spec-required');
+  wrap.style.display='flex';
+  wrap.innerHTML=
+    `<div class="spec-intro">${cfg.intro}</div>`+
+    cfg.questions.map(q=>
+      `<div class="spec-q" data-q="${q.key}">
+        <div class="spec-q-lbl">${q.key}</div>
+        <div class="spec-chips">
+          ${q.options.map(o=>`<button type="button" class="spec-chip" onclick="selectSpec('${q.key}','${o}')">${o}</button>`).join('')}
+        </div>
+      </div>`).join('')+
+    (cfg.help?`<button type="button" class="spec-help" onclick="specHelp('${itemName}')">🤔 Tenho dúvida — me ensina</button>`:'');
+}
+
+function selectSpec(qkey,value){
+  if(!S.currentSpec) S.currentSpec={};
+  S.currentSpec[qkey]=value;
+  document.querySelectorAll(`.spec-q[data-q="${qkey}"] .spec-chip`).forEach(b=>{
+    b.classList.toggle('on', b.textContent.trim()===value);
+  });
+  document.getElementById('spec-wrap').classList.remove('spec-required');
+}
+
+function specHelp(itemName){
+  const cfg=ITEM_SPECS[itemName];
+  if(cfg&&cfg.help){ silenceMonica(); ia(cfg.help,()=>{if(SpeechRec&&!S.listening) startListening();}); }
+}
+
+function specComplete(itemName){
+  const cfg=ITEM_SPECS[itemName];
+  if(!cfg) return true;
+  return cfg.questions.every(q=>S.currentSpec&&S.currentSpec[q.key]);
+}
+
+function specToNote(itemName){
+  const s=S.currentSpec||{};
+  if(itemName==='Cama') return `Cama ${s['Tamanho']}`;
+  if(itemName==='Sofá') return `${s['Sofá-cama']==='Sim'?'Sofá-cama':'Sofá comum'} · ${s['Tamanho']}`;
+  return Object.values(s).join(' · ');
+}
+
 function mark(status){
   if(S.pendingAdvance) return;
 
@@ -1464,17 +1612,31 @@ function mark(status){
     if(fotoBtn) fotoBtn.classList.add('required');
     if(fotoObrig) fotoObrig.classList.add('visible');
     // IA pede foto educadamente
-    window.speechSynthesis.cancel();speechQueue=[];speaking=false;
+    silenceMonica();
     ia('Falta a foto desse item. Sem foto a gente não avança.');
+    return;
+  }
+
+  // Trava: cama/sofá precisam de especificação antes de OK/Ressalva (ausente é exceção)
+  if(status!=='ausente'&&!specComplete(curItem().name)){
+    const cfg=ITEM_SPECS[curItem().name];
+    document.getElementById('spec-wrap').classList.add('spec-required');
+    silenceMonica();
+    ia(cfg.intro);
     return;
   }
 
   S.pendingAdvance=true;
   const item=curItem();
   const noteRaw=(S.currentNote||document.getElementById('note-input').value).trim();
-  const note=item.name==='Pin de localização'&&S.currentLocCoords
+  let note=item.name==='Pin de localização'&&S.currentLocCoords
     ?`${S.currentLocCoords.lat},${S.currentLocCoords.lng} | ±${S.currentLocCoords.acc}m | ${S.currentLocCoords.mapsUrl}`
     :noteRaw;
+  // anexa a especificação (cama/sofá) à observação
+  if(status!=='ausente'&&ITEM_SPECS[item.name]){
+    const st=specToNote(item.name);
+    note = st + (note?` — ${note}`:'');
+  }
   const exp=expQty(item.name);
   const lowQty=!isStruct(item.name)&&S.currentQty<exp&&status==='ok';
   const finalStatus=lowQty?'ressalva':status;
@@ -1746,7 +1908,7 @@ function addCustom(){
 // ── SUMMARY ───────────────────────────────────────────────────
 async function showSummary(){
   stopListening();
-  window.speechSynthesis.cancel();
+  silenceMonica();
   document.getElementById('fab').classList.remove('visible');
 
   const fotos=await getAllFotos();
@@ -1932,9 +2094,10 @@ async function gerarRelatorioHTML(){
     const gridItems=items.map(it=>{
       const key=`${env}||${it.item}`;
       const foto=(fotoMap[key]||[])[0];
+      const isPinLoc=it.item==='Pin de localização'&&it.note&&it.note.includes('google.com/maps');
       const fotoHtml=foto
         ?`<img src="${foto.dataUrl}" style="width:100%;max-height:140px;object-fit:cover;border-radius:6px;display:block;margin-bottom:6px"/>`
-        :`<div style="width:100%;height:60px;background:#F3F3F5;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;font-size:10px;color:#aaa">sem foto</div>`;
+        :(isPinLoc?'':`<div style="width:100%;height:60px;background:#F3F3F5;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-bottom:6px;font-size:10px;color:#aaa">sem foto</div>`);
       const border=it.status!=='ok'?sColor[it.status]:'#E6E7EA';
       return `<div style="border:1.5px solid ${border};border-radius:8px;padding:10px;background:${it.status!=='ok'?sBg[it.status]:'#fff'}">
         ${fotoHtml}
@@ -2029,9 +2192,8 @@ function sendPlatform(){navigator.clipboard.writeText(JSON.stringify({property:S
 function copyReport(){navigator.clipboard.writeText(buildReport()).then(()=>{const b=document.querySelector('#s-summary .btn-secondary');const o=b.textContent;b.textContent='Copiado!';setTimeout(()=>b.textContent=o,2000);});}
 
 function restart(){
-  window.speechSynthesis.cancel();
-  speechQueue=[]; speaking=false;
-  Object.assign(S,{name:'',prop:'',guests:0,tpl:null,envIdx:0,itemIdx:0,currentQty:1,results:[],fotos:[],listening:false,recognition:null,iaSpeaking:false,pendingAdvance:false,currentNote:'',currentItemHasPhoto:false,mode:'entrada',prevResults:[],batchDone:{},currentLocCoords:null});
+  silenceMonica();
+  Object.assign(S,{name:'',prop:'',guests:0,tpl:null,envIdx:0,itemIdx:0,currentQty:1,results:[],fotos:[],listening:false,recognition:null,iaSpeaking:false,pendingAdvance:false,currentNote:'',currentItemHasPhoto:false,mode:'entrada',prevResults:[],batchDone:{},currentLocCoords:null,currentSpec:{}});
   document.querySelectorAll('.tpl-card').forEach(c=>c.classList.remove('selected'));
   document.getElementById('tpl-grid').firstChild.click();
   ['inp-name','inp-prop','inp-guests'].forEach(id=>document.getElementById(id).value='');
