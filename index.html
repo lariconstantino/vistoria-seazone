@@ -188,10 +188,21 @@ body{
 .manut-item:last-child{border-bottom:none}
 /* intro placeholder */
 .intro-placeholder{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:28px 20px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
-.intro-placeholder-icon{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#0055FF 0%,#003DC2 100%);border:3px solid rgba(0,85,255,.15);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;transition:box-shadow .3s ease}
-.intro-placeholder-icon img{width:100%;height:100%;object-fit:cover;object-position:top center}
-.intro-placeholder-icon .avatar-initials{font-size:24px;font-weight:700;color:#fff;letter-spacing:.5px;user-select:none}
-.intro-placeholder-icon.speaking{box-shadow:0 0 0 3px #0055FF,0 0 0 7px rgba(0,85,255,.18),0 0 0 12px rgba(0,85,255,.07)}
+.intro-placeholder-icon{width:130px;height:152px;border-radius:14px;background:linear-gradient(160deg,#EEF2FF 0%,#DBEAFE 100%);border:1px solid rgba(0,85,255,.12);display:flex;align-items:center;justify-content:center;overflow:visible;flex-shrink:0;transition:box-shadow .3s ease}
+.intro-placeholder-icon svg{display:block}
+.intro-placeholder-icon.speaking{box-shadow:0 0 0 3px #0055FF,0 0 18px rgba(0,85,255,.28)}
+.char-arm-l{transform-origin:38px 92px;animation:charArmL 3s ease-in-out infinite}
+.char-arm-r{transform-origin:82px 92px;animation:charArmR 3s ease-in-out infinite 1.1s}
+.char-head{transform-origin:60px 52px;animation:charHead 4s ease-in-out infinite}
+@keyframes charArmL{0%,100%{transform:rotate(0deg)}40%{transform:rotate(-12deg)}70%{transform:rotate(6deg)}}
+@keyframes charArmR{0%,100%{transform:rotate(0deg)}40%{transform:rotate(10deg)}70%{transform:rotate(-7deg)}}
+@keyframes charHead{0%,100%{transform:rotate(0deg)}50%{transform:rotate(2deg)}}
+[data-avatar].speaking .char-arm-l{animation:charArmLTalk .55s ease-in-out infinite}
+[data-avatar].speaking .char-arm-r{animation:charArmRTalk .55s ease-in-out infinite .27s}
+[data-avatar].speaking .char-head{animation:charHeadTalk .7s ease-in-out infinite}
+@keyframes charArmLTalk{0%,100%{transform:rotate(-18deg)}50%{transform:rotate(10deg)}}
+@keyframes charArmRTalk{0%,100%{transform:rotate(-16deg)}50%{transform:rotate(14deg)}}
+@keyframes charHeadTalk{0%,100%{transform:rotate(-2.5deg)}50%{transform:rotate(2.5deg)}}
 .intro-placeholder-name{font-size:18px;font-weight:700;color:var(--foreground);letter-spacing:-.3px}
 .intro-placeholder-role{font-size:12px;color:var(--muted-foreground);letter-spacing:.06em;text-transform:uppercase}
 .intro-voice-bars{display:flex;align-items:center;gap:3px;height:28px;margin:4px 0}
@@ -335,11 +346,7 @@ body{
 <!-- PROPERTY DISCOVERY -->
 <div id="s-property-desc" class="screen">
   <div class="intro-placeholder">
-    <div class="intro-placeholder-icon" data-avatar><span class="avatar-initials">MM</span></div>
-    <div>
-      <div class="intro-placeholder-name">Monica Medeiros</div>
-      <div class="intro-placeholder-role">Seazone · Implantação</div>
-    </div>
+    <div class="intro-placeholder-icon" data-avatar></div>
     <div class="intro-voice-bars" id="pd-bars">
       <div class="ivbar" id="pb0"></div><div class="ivbar" id="pb1"></div>
       <div class="ivbar" id="pb2"></div><div class="ivbar" id="pb3"></div>
@@ -389,11 +396,7 @@ body{
 <div id="s-intro" class="screen">
 
   <div class="intro-placeholder">
-    <div class="intro-placeholder-icon" data-avatar><span class="avatar-initials">MM</span></div>
-    <div>
-      <div class="intro-placeholder-name">Monica Medeiros</div>
-      <div class="intro-placeholder-role">Seazone · Implantação</div>
-    </div>
+    <div class="intro-placeholder-icon" data-avatar></div>
     <!-- Barras de voz -->
     <div class="intro-voice-bars" id="intro-bars">
       <div class="ivbar" id="ib0"></div><div class="ivbar" id="ib1"></div>
@@ -721,13 +724,12 @@ function expQty(name){return(!S.guests||!PER_GUEST.has(name))?1:S.guests}
 function isStruct(name){return STRUCTURAL.has(name)||/^(Piso|Parede|Teto|Porta|Janela|Cortina|Lâmpada|Interruptor|Ralo|Box|Exaust|Lareira|Guarda|Interfone|Modem|Wi-fi|Quadro|Voltag|Pin|Tour|Capacidade|Itens pessoais)/i.test(name)}
 
 // ── AVATAR DA MONICA ──────────────────────────────────────────
-// Troque para URL ou base64 quando tiver a foto: 'data:image/jpeg;base64,...'
-const MONICA_AVATAR = 'data:image/jpeg;base64,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';
+// SVG avatar animado — braços gesticulam em idle e ao falar
+const MONICA_AVATAR = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150"><defs><linearGradient id="avbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#EEF2FF"/><stop offset="100%" stop-color="#DBEAFE"/></linearGradient></defs><rect width="120" height="150" rx="14" fill="url(#avbg)"/><g class="char-arm-l"><path d="M38 92 C30 98 20 108 15 124" stroke="#DFA882" stroke-width="11" fill="none" stroke-linecap="round"/><ellipse cx="14" cy="128" rx="8" ry="7" fill="#DFA882" transform="rotate(-15 14 128)"/><path d="M8 125 Q7 120 11 119" stroke="#C78055" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M13 124 Q13 119 17 119" stroke="#C78055" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M18 125 Q19 120 23 121" stroke="#C78055" stroke-width="1.5" fill="none" stroke-linecap="round"/></g><ellipse cx="60" cy="120" rx="27" ry="22" fill="white"/><path d="M33 102 Q60 112 87 102" stroke="#EEF2FF" stroke-width="8" fill="none" stroke-linecap="round"/><path d="M49 102 L60 116 L71 102" fill="none" stroke="#E2E8F0" stroke-width="1.5" stroke-linecap="round"/><g class="char-arm-r"><path d="M82 92 C90 84 102 74 108 60" stroke="#DFA882" stroke-width="11" fill="none" stroke-linecap="round"/><ellipse cx="109" cy="56" rx="8" ry="7" fill="#DFA882" transform="rotate(15 109 56)"/><path d="M103 51 Q103 47 107 47" stroke="#C78055" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M108 49 Q109 45 112 46" stroke="#C78055" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M113 52 Q115 48 118 50" stroke="#C78055" stroke-width="1.5" fill="none" stroke-linecap="round"/></g><rect x="52" y="76" width="16" height="20" rx="6" fill="#DFA882"/><g class="char-head"><path d="M33 48 Q35 20 60 18 Q85 20 87 48 Q81 26 60 26 Q39 26 33 48Z" fill="#1A0A04"/><circle cx="60" cy="52" r="27" fill="#DFA882"/><circle cx="82" cy="28" r="12" fill="#1A0A04"/><path d="M80 18 Q88 24 88 42" stroke="#1A0A04" stroke-width="7" fill="none" stroke-linecap="round"/><path d="M33 44 Q35 20 60 18 Q85 20 87 44 Q82 28 60 28 Q38 28 33 44Z" fill="#1A0A04"/><path d="M44 46 Q50 43 56 46" stroke="#3D1A08" stroke-width="2.2" fill="none" stroke-linecap="round"/><path d="M64 46 Q70 43 76 46" stroke="#3D1A08" stroke-width="2.2" fill="none" stroke-linecap="round"/><ellipse cx="50" cy="53" rx="5.5" ry="6" fill="#1A0A04"/><ellipse cx="50" cy="53" rx="3" ry="3.5" fill="#5C3010"/><circle cx="52" cy="51" r="2" fill="white"/><ellipse cx="70" cy="53" rx="5.5" ry="6" fill="#1A0A04"/><ellipse cx="70" cy="53" rx="3" ry="3.5" fill="#5C3010"/><circle cx="72" cy="51" r="2" fill="white"/><path d="M57 60 Q60 64 63 60" stroke="#C07A50" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M46 68 Q60 77 74 68" stroke="#9E4B24" stroke-width="2.5" fill="none" stroke-linecap="round"/><ellipse cx="38" cy="62" rx="8" ry="5" fill="#F08060" opacity="0.25"/><ellipse cx="82" cy="62" rx="8" ry="5" fill="#F08060" opacity="0.25"/><circle cx="33" cy="55" r="4" fill="#0055FF" opacity="0.9"/><circle cx="87" cy="55" r="4" fill="#0055FF" opacity="0.9"/><circle cx="32" cy="54" r="1.5" fill="white" opacity="0.5"/><circle cx="86" cy="54" r="1.5" fill="white" opacity="0.5"/></g></svg>';
 
 function initMonicaAvatars(){
-  if(!MONICA_AVATAR) return;
   document.querySelectorAll('[data-avatar]').forEach(el=>{
-    el.innerHTML=`<img src="${MONICA_AVATAR}" alt="Monica Medeiros">`;
+    el.innerHTML=MONICA_AVATAR;
   });
 }
 
