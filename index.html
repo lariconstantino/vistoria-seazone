@@ -757,6 +757,11 @@ function loadVoices(){
 window.speechSynthesis.addEventListener('voiceschanged',loadVoices);
 loadVoices();
 initMonicaAvatars();
+document.querySelectorAll('[data-avatar] video').forEach(v=>{
+  const idle=()=>{if(!S.iaSpeaking){v.playbackRate=0.15;}};
+  idle();
+  v.addEventListener('canplay',idle);
+});
 
 // ── ENGINE DE VOZ ──────────────────────────────────────────────
 let speechQueue=[];
@@ -799,6 +804,10 @@ function setIaUI(active, text=''){
   if(txt&&text) txt.textContent=text.length>60?text.slice(0,57)+'…':text;
   S.iaSpeaking=active;
   document.querySelectorAll('[data-avatar]').forEach(a=>a.classList.toggle('speaking',active));
+  document.querySelectorAll('[data-avatar] video').forEach(v=>{
+    if(active){v.play().catch(()=>{});v.playbackRate=1;}
+    else{v.playbackRate=0.15;}
+  });
 }
 
 // ── SCRIPTS NO TOM DA MONICA ──────────────────────────────────
