@@ -46,6 +46,13 @@ O link permanente fica em:
 
 ---
 
+## 🔭 Reconhecimento de itens na foto (PARADO — aguardando integração de IA)
+O Worker já tem a rota **`/recognize`** (Claude vision / MiniMax via endpoint compatível-Anthropic), mas está **dormente**: sem chave, responde `{recognized:[], disabled:true}` e o app segue normal.
+Pra ativar quando tiver a integração:
+1. No Worker, setar (Secret): `VISION_API_KEY`. E (Variables) `VISION_BASE_URL` + `VISION_MODEL` se for MiniMax (`https://api.minimax.io/anthropic` + modelo de visão). Anthropic é o padrão (Claude Haiku), só precisa da chave.
+2. Fazer o `wrangler deploy` (a rota já está no código, mas o Worker ao vivo ainda é a versão sem ela — redeployar).
+3. No app: ligar a chamada em `onBatchPhotoSelected` (foto dos utensílios) → `/recognize` → Monica confirma os reconhecidos numa pergunta só e reusa a foto no HTML (itens de quantidade continuam passando individualmente).
+
 ## ⚠️ Importante para o deploy do app
 Os relatórios são commitados na branch **main** (a mesma do GitHub Pages). **Não** publicar o app com `git push --force` (apagaria os relatórios). Usar:
 ```

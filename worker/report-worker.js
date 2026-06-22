@@ -47,6 +47,64 @@ function toBase64Utf8(str) {
   return btoa(bin);
 }
 
+// Reconhece quais itens da lista aparecem na foto (Claude vision)
+async function handleRecognize(req, env) {
+  let body;
+  try { body = await req.json(); } catch { return json({ error: 'JSON inválido' }, 400); }
+  const candidates = Array.isArray(body.candidates) ? body.candidates : [];
+  const image = body.image || '';
+  // Provedor flexível: Anthropic (padrão) ou MiniMax (endpoint compatível com Anthropic).
+  // Configure no Worker: VISION_API_KEY, VISION_BASE_URL, VISION_MODEL.
+  const apiKey = env.VISION_API_KEY || env.ANTHROPIC_API_KEY || env.MINIMAX_API_KEY;
+  const baseUrl = (env.VISION_BASE_URL || 'https://api.anthropic.com').replace(/\/$/, '');
+  const model = env.VISION_MODEL || 'claude-haiku-4-5-20251001';
+  if (!apiKey) return json({ recognized: [], disabled: true });
+  if (!image || !candidates.length) return json({ recognized: [] });
+
+  // separa media_type + base64 do dataURL
+  const mt = (image.match(/^data:(image\/[a-zA-Z]+);base64,/) || [])[1] || 'image/jpeg';
+  const b64 = image.replace(/^data:image\/[a-zA-Z]+;base64,/, '');
+
+  const prompt = `Você analisa a foto de um ambiente numa vistoria de imóvel. Quais destes itens aparecem CLARAMENTE na imagem?\n\nItens possíveis:\n${candidates.map(c => '- ' + c).join('\n')}\n\nResponda APENAS com JSON válido: {"itens":["Nome exato da lista", ...]}. Use exatamente os nomes da lista acima. Não inclua itens que não estão visíveis. Se não tiver certeza de um item, não inclua.`;
+
+  try {
+    const r = await fetch(`${baseUrl}/v1/messages`, {
+      method: 'POST',
+      headers: {
+        // x-api-key (Anthropic) + Bearer (MiniMax e afins) — o provedor usa o que reconhece
+        'x-api-key': apiKey,
+        'authorization': `Bearer ${apiKey}`,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 400,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mt, data: b64 } },
+            { type: 'text', text: prompt },
+          ],
+        }],
+      }),
+    });
+    if (!r.ok) { const t = await r.text(); return json({ recognized: [], error: 'anthropic_' + r.status, detail: t.slice(0, 200) }); }
+    const data = await r.json();
+    const text = (data.content && data.content[0] && data.content[0].text) || '';
+    const m = text.match(/\{[\s\S]*\}/);
+    let itens = [];
+    if (m) { try { itens = (JSON.parse(m[0]).itens) || []; } catch {} }
+    // só aceita nomes que estão exatamente na lista de candidatos
+    const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
+    const set = new Map(candidates.map(c => [norm(c), c]));
+    const recognized = [...new Set(itens.map(i => set.get(norm(i))).filter(Boolean))];
+    return json({ recognized });
+  } catch (e) {
+    return json({ recognized: [], error: 'fetch_failed' });
+  }
+}
+
 export default {
   async fetch(req, env) {
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
@@ -55,6 +113,11 @@ export default {
     // proteção opcional contra abuso casual
     if (env.APP_SECRET && req.headers.get('X-App-Secret') !== env.APP_SECRET) {
       return json({ error: 'unauthorized' }, 401);
+    }
+
+    // rota de reconhecimento de itens na foto
+    if (new URL(req.url).pathname.replace(/\/$/, '').endsWith('/recognize')) {
+      return await handleRecognize(req, env);
     }
 
     let payload;
