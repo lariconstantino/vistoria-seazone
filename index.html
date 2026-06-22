@@ -756,6 +756,13 @@ const MONICA_VOICE_ID = '9FdNXU6Ju6062J29ADKr';
 const REPORT_WORKER_URL = 'https://vistoria-report.larissa-constantino.workers.dev';
 
 let currentAudio=null;
+// Elemento de áudio ÚNICO e persistente — destravado no 1º gesto (iOS bloqueia
+// play() de Audio criado fora de gesto). Reusar o mesmo elemento mantém o play liberado.
+let _monicaAudio=null;
+function getMonicaAudio(){
+  if(!_monicaAudio){ _monicaAudio=new Audio(); _monicaAudio.playsInline=true; _monicaAudio.preload='auto'; }
+  return _monicaAudio;
+}
 async function speakElevenLabs(text){
   if(!ELEVEN_API_KEY||!MONICA_VOICE_ID) return false;
   try{
@@ -764,21 +771,23 @@ async function speakElevenLabs(text){
       headers:{'xi-api-key':ELEVEN_API_KEY,'Content-Type':'application/json'},
       body:JSON.stringify({
         text,
-        model_id:'eleven_multilingual_v2',
+        model_id:'eleven_turbo_v2_5', // baixa latência (pt-BR) — reduz o delay até a fala começar
         voice_settings:{stability:0.55,similarity_boost:0.88,style:0.3,use_speaker_boost:true}
       })
     });
     if(!res.ok) return false;
     const blob=await res.blob();
     const url=URL.createObjectURL(blob);
-    return new Promise(res=>{
-      const a=new Audio(url);
+    return new Promise(resolve=>{
+      const a=getMonicaAudio();
       currentAudio=a;
-      // vídeo só começa quando o áudio realmente toca → sincronizado
+      a.muted=false;
       a.onplay =()=>startAvatarTalk();
-      a.onended=()=>{stopAvatarTalk();URL.revokeObjectURL(url);if(currentAudio===a)currentAudio=null;res(true);};
-      a.onerror=()=>{stopAvatarTalk();URL.revokeObjectURL(url);if(currentAudio===a)currentAudio=null;res(false);};
-      a.play().catch(()=>{stopAvatarTalk();res(false);});
+      a.onended=()=>{stopAvatarTalk();URL.revokeObjectURL(url);if(currentAudio===a)currentAudio=null;resolve(true);};
+      a.onerror=()=>{stopAvatarTalk();URL.revokeObjectURL(url);if(currentAudio===a)currentAudio=null;resolve(false);};
+      a.src=url;
+      const p=a.play();
+      if(p&&p.catch) p.catch(()=>{stopAvatarTalk();resolve(false);});
     });
   }catch{stopAvatarTalk();return false;}
 }
@@ -840,14 +849,23 @@ document.querySelectorAll('[data-avatar] video').forEach(v=>{
 // MOBILE (iOS/Modo Baixo Consumo bloqueia autoplay): destrava os vídeos no 1º gesto
 // do usuário — um play()+pause() dentro do gesto libera o play programático depois.
 let _avatarUnlocked=false;
-function unlockAvatarVideos(){
+function unlockMedia(){
   if(_avatarUnlocked) return; _avatarUnlocked=true;
+  // destrava os vídeos do avatar
   document.querySelectorAll('[data-avatar] video').forEach(v=>{
     const p=v.play();
     if(p&&p.then) p.then(()=>{ if(!_avatarTalking){ try{v.currentTime=0;}catch{} v.pause(); } }).catch(()=>{});
   });
+  // destrava o áudio: toca um wav silencioso no elemento único, dentro do gesto
+  try{
+    const a=getMonicaAudio();
+    a.muted=true;
+    a.src='data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+    const p=a.play();
+    if(p&&p.then) p.then(()=>{ a.pause(); try{a.currentTime=0;}catch{} a.muted=false; }).catch(()=>{a.muted=false;});
+  }catch{}
 }
-['pointerdown','touchend','click'].forEach(evt=>document.addEventListener(evt,unlockAvatarVideos,{once:true,passive:true}));
+['pointerdown','touchend','click'].forEach(evt=>document.addEventListener(evt,unlockMedia,{once:true,passive:true}));
 
 // ── ENGINE DE VOZ ──────────────────────────────────────────────
 let speechQueue=[];
@@ -865,7 +883,7 @@ async function processQueue(){
   window.speechSynthesis.cancel();
   setIaUI(true,text);
 
-  // Tenta ElevenLabs primeiro
+  // Tenta ElevenLabs primeiro (avatar inicia JUNTO com o áudio, no onplay)
   const ok=await speakElevenLabs(text);
   if(ok){
     if(onDone) onDone();
