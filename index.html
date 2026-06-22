@@ -1496,12 +1496,15 @@ function showIntro(){
   ['step-1','step-2','step-3'].forEach(id=>document.getElementById(id).classList.remove('show'));
   stopIntroBars();
 
+  // CRÍTICO p/ mobile: dispara o vídeo DENTRO do clique (gesto) — iOS garante play em gesto.
+  // O áudio de abertura está pré-carregado, então a voz entra junto, sincronizada.
+  if(typeof unlockMedia==='function') unlockMedia();
+  startAvatarTalk();
+
   setTimeout(()=>{
     const speechEl=document.getElementById('intro-speech-text');
     speechEl.textContent='';
     startIntroBars();
-    // garante mídia destravada (caso o clique não tenha disparado o unlock antes)
-    if(typeof unlockMedia==='function') unlockMedia();
 
     // Texto progride com a fala
     const words=FULL_INTRO.split(' ');
