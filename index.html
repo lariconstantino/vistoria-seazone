@@ -837,6 +837,18 @@ document.querySelectorAll('[data-avatar] video').forEach(v=>{
   setTimeout(kick,300);
 });
 
+// MOBILE (iOS/Modo Baixo Consumo bloqueia autoplay): destrava os vídeos no 1º gesto
+// do usuário — um play()+pause() dentro do gesto libera o play programático depois.
+let _avatarUnlocked=false;
+function unlockAvatarVideos(){
+  if(_avatarUnlocked) return; _avatarUnlocked=true;
+  document.querySelectorAll('[data-avatar] video').forEach(v=>{
+    const p=v.play();
+    if(p&&p.then) p.then(()=>{ if(!_avatarTalking){ try{v.currentTime=0;}catch{} v.pause(); } }).catch(()=>{});
+  });
+}
+['pointerdown','touchend','click'].forEach(evt=>document.addEventListener(evt,unlockAvatarVideos,{once:true,passive:true}));
+
 // ── ENGINE DE VOZ ──────────────────────────────────────────────
 let speechQueue=[];
 let speaking=false;
@@ -1273,7 +1285,8 @@ function startPropertyDiscovery(){
   buildEnvPickGrid();
   const el=document.getElementById('pd-speech-text');el.textContent='';
   const nome=S.name?S.name.split(' ')[0]:'';
-  const q=`${nome?nome+', a':'A'} gente vai montar o imóvel ${S.prop} agora. Toca nos ambientes que ele tem — quarto, suíte, sala, cozinha, banheiro, lavabo, área de serviço, varanda. Se tiver mais de um, toca de novo: dois quartos, toca duas vezes, né? Quando terminar, é só confirmar.`;
+  const cod=(S.prop && S.prop.toLowerCase()!=='imóvel')?` ${S.prop}`:'';
+  const q=`${nome?nome+', a':'A'} gente vai montar o imóvel${cod} agora. Toca nos ambientes que ele tem — quarto, suíte, sala, cozinha, banheiro, lavabo, área de serviço, varanda. Se tiver mais de um, toca de novo: dois quartos, toca duas vezes, né? Quando terminar, é só confirmar.`;
   startPdBars();
   const words=q.split(' ');let wi=0;
   const wt=setInterval(()=>{if(wi<words.length)el.textContent=words.slice(0,++wi).join(' ');else clearInterval(wt);},100);
