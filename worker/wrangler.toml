@@ -1,0 +1,10 @@
+name = "vistoria-report"
+main = "report-worker.js"
+compatibility_date = "2024-11-01"
+
+# Variáveis não-secretas (os secrets GITHUB_TOKEN/SLACK_WEBHOOK vão via dashboard ou `wrangler secret put`)
+[vars]
+GH_OWNER = "lariconstantino"
+GH_REPO = "vistoria-seazone"
+GH_BRANCH = "main"
+PAGES_BASE = "https://lariconstantino.github.io/vistoria-seazone"
