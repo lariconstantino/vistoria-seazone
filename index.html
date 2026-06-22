@@ -803,27 +803,27 @@ function setIaUI(active, text=''){
 }
 
 // ── SCRIPTS NO TOM DA MONICA ──────────────────────────────────
-// Calorosa, direta, encorajadora — como ela fala naturalmente
+// Voz da Mônica Medeiros (CCO Seazone): "a gente", pausada, direta, sem linguagem de assistente
 function greeting(){
   const nome=S.name?` ${S.name.split(' ')[0]}`:'';
-  if(S.mode==='revisao') return `Oi${nome}! Bora fazer a revisão das pendências do imóvel ${S.prop}? Vou passar só os itens que precisavam de atenção. Pode começar!`;
+  if(S.mode==='revisao') return `Oi${nome}! A gente vai resolver as pendências do ${S.prop} agora. Só os itens que precisam de atenção — rápido e direto. Bora!`;
   const env=curEnv().name;
-  return `Oi${nome}! Que bom ter você aqui. Bora fazer a vistoria do imóvel ${S.prop} juntas? Vou passando cada item — você fala como tá, tira a foto e diz pronto. Vamos começar pelo ${env}!`;
+  return `Oi${nome}! Vamos fazer a vistoria do ${S.prop} juntos, né? Vou passando cada item — você registra como tá, tira a foto e diz pronto. A gente começa pelo ${env}!`;
 }
 
 function envIntro(envName){
   const frases=[
-    `Que isso, arrasou! Agora bora pro ${envName}.`,
-    `Boa! Passando pro ${envName}.`,
-    `Isso aí! Seguindo pro ${envName}.`,
-    `Show! Vamos pro ${envName}.`
+    `Boa! A gente vai pro ${envName} agora.`,
+    `Isso mesmo! Passando pro ${envName}.`,
+    `Show. Seguindo pro ${envName}.`,
+    `Certo! Agora o ${envName}.`
   ];
   return frases[S.envIdx%frases.length];
 }
 
 function itemPrompt(itemName){
   const instruction=TEST_INSTRUCTIONS[itemName];
-  const mandAviso=MANDATORY_ITEMS.has(itemName)?' Atenção: item obrigatório para ativação!':'';
+  const mandAviso=MANDATORY_ITEMS.has(itemName)?' Item obrigatório pra ativação.':'';
   if(instruction) return `${itemName}.${mandAviso} ${instruction}`;
   return itemName+(mandAviso?'.'+mandAviso:'');
 }
@@ -837,9 +837,9 @@ function itemCategoryLabel(name){
 }
 
 function afterMark(status, nextItem){
-  if(status==='ressalva') return `Ressalva registrada.${nextItem?' Próximo: '+nextItem:''}`;
-  if(status==='ausente') return `Item marcado como ausente.${nextItem?' Próximo: '+nextItem:''}`;
-  return nextItem?`Próximo: ${nextItem}`:'';
+  if(status==='ressalva') return `Ressalva anotada.${nextItem?' Próximo: '+nextItem:''}`;
+  if(status==='ausente') return `Marcado como ausente.${nextItem?' Próximo: '+nextItem:''}`;
+  return nextItem?`Ótimo. Próximo: ${nextItem}`:'';
 }
 
 // ── MODO DE VISTORIA ──────────────────────────────────────────
@@ -974,7 +974,7 @@ function startBatchCapture(){
     chip.style.cssText='background:var(--input);border:1px solid var(--border);border-radius:var(--rfull);padding:3px 10px;font-size:11px;font-weight:600;color:var(--muted)';
     chip.textContent=item.name;list.appendChild(chip);
   });
-  ia('Boa! Agora me manda uma foto com todos os utensílios da cozinha — gaveta aberta, prateleira, escorredor, tábua... Tudo numa foto só!');
+  ia('Agora a gente registra os utensílios da cozinha. Uma foto só — gaveta aberta, prateleira, escorredor, tábua. Tudo junto, né?');
 }
 
 function onBatchPhotoSelected(e){
@@ -992,7 +992,7 @@ function onBatchPhotoSelected(e){
   document.getElementById('ba-retake-btn').style.display='block';
   document.getElementById('ba-sonar').style.display='flex';
   document.getElementById('ba-status').textContent='🎤 Diz "pronto" se tiver tudo, ou fala o que faltou';
-  ia('Ficou boa? Se tiver tudo certo, diz pronto. Se faltar alguma coisa, fala o que não tá lá!',()=>{
+  ia('Ficou boa? Se tiver tudo, diz pronto. Se faltar alguma coisa, fala o que não tá lá.',()=>{
     if(SpeechRec) startBatchListen();
   });
 }
@@ -1056,7 +1056,7 @@ function retakeBatch(){
   document.getElementById('ba-retake-btn').style.display='none';
   document.getElementById('ba-sonar').style.display='none';
   document.getElementById('ba-btn-foto').className='btn-foto required';
-  ia('Tudo bem, tira de novo! Tenta pegar tudo numa foto só — bem iluminada.');
+  ia('Tira de novo. Tenta pegar tudo numa foto só — bem iluminada.');
 }
 
 // ── DISCOVERY DE AMBIENTES ────────────────────────────────────
@@ -1152,12 +1152,12 @@ function startPropertyDiscovery(){
   document.getElementById('pd-transcript').textContent='';
   document.getElementById('pd-status').textContent='Aguardando Monica…';
   const nome=S.name?` ${S.name.split(' ')[0]}`:'';
-  const q=`Bora lá${nome?', '+S.name.split(' ')[0]:''}! Me conta como é o imóvel ${S.prop} — quantos quartos tem, tem suíte? Sala, cozinha, banheiro, área de serviço... Pode soltar tudo de uma vez que eu já vou anotando!`;
+  const q=`${S.name?S.name.split(' ')[0]+', a':'A'} gente vai mapear o imóvel ${S.prop} primeiro. Me conta como é — quantos quartos tem, tem suíte? Sala, cozinha, banheiro, área de serviço... Pode falar tudo de uma vez, né? Eu já vou anotando.`;
   const el=document.getElementById('pd-speech-text');el.textContent='';
   startPdBars();
   const words=q.split(' ');let wi=0;
   const wt=setInterval(()=>{if(wi<words.length)el.textContent=words.slice(0,++wi).join(' ');else clearInterval(wt);},100);
-  ia(q,()=>{clearInterval(wt);el.textContent=q;stopPdBars();document.getElementById('pd-status').textContent='🎤 Pode falar, tô toda ouvidos!';if(SpeechRec)startPdListen();});
+  ia(q,()=>{clearInterval(wt);el.textContent=q;stopPdBars();document.getElementById('pd-status').textContent='🎤 Pode falar!';if(SpeechRec)startPdListen();});
 }
 
 function confirmPropertyDesc(){
@@ -1262,12 +1262,12 @@ function _beginEnv(idx){
 }
 
 // ── SCRIPTS NO TOM DA MONICA ──────────────────────────────────
-const MONICA_INTRO_SCRIPT=`Oi! A gente vai fazer a vistoria juntas agora. Esse é o momento de registrar como o imóvel tá, garantir que tudo tá funcionando e já anotar o que precisa de manutenção. Eu vou te guiar em cada item, tá? É só seguir o fluxo comigo. Bora lá!`;
+const MONICA_INTRO_SCRIPT=`Oi! Vistoria bem feita é o que separa um imóvel que fatura do que gera reclamação. A gente vai registrar cada item agora, né? Você fala como tá, tira a foto, diz pronto — e a gente avança. Rápido, organizado, sem deixar nada pra trás. Bora começar!`;
 
 const STEP_SCRIPTS=[
-  {step:'step-1', txt:'Fala pra mim como tá o item — pode falar mesmo, eu já anoto aqui pra você.'},
-  {step:'step-2', txt:'Tira uma foto de cada item, tá? Sem foto a gente não consegue avançar. Só ausente é exceção.'},
-  {step:'step-3', txt:'Depois da foto é só falar pronto e eu já pulo pro próximo. Simples assim!'}
+  {step:'step-1', txt:'Pra cada item, você fala como tá — bom, com ressalva ou ausente. Pode falar, né? Eu processo aqui.'},
+  {step:'step-2', txt:'Foto é obrigatória. Item sem foto não avança, é regra da vistoria. Exceção só pra item ausente.'},
+  {step:'step-3', txt:'Disse pronto? A gente passa pro próximo automaticamente. Assim a vistoria fica registrada de verdade.'}
 ];
 
 let _wordTimer=null;
@@ -1457,7 +1457,7 @@ function mark(status){
     if(fotoObrig) fotoObrig.classList.add('visible');
     // IA pede foto educadamente
     window.speechSynthesis.cancel();speechQueue=[];speaking=false;
-    ia('Ei, falta a foto desse item! Tira rapidinho pra gente poder avançar.');
+    ia('Falta a foto desse item. Sem foto a gente não avança.');
     return;
   }
 
@@ -1710,7 +1710,7 @@ async function onFotoSelected(e){
   if(fotoObrig) fotoObrig.classList.remove('visible');
 
   // IA confirma e pede para dizer pronto
-  ia('Foto tirada! Agora é só falar pronto pra mim.');
+  ia('Foto registrada. Diz pronto pra avançar.');
   if(SpeechRec&&!S.listening) startListening();
 }
 
