@@ -79,7 +79,8 @@ body{
 .qty-row{display:inline-flex;align-items:center;background:var(--input);border:1px solid var(--border);border-radius:8px;overflow:hidden;align-self:flex-start}
 .qty-btn{width:48px;height:48px;background:transparent;border:none;color:var(--fg);font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;font-family:var(--font)}
 .qty-btn:hover{background:var(--muted-bg)}
-.qty-val{font-size:18px;font-weight:700;color:var(--blue);padding:0 18px;min-width:52px;text-align:center}
+.qty-val{font-size:18px;font-weight:700;color:var(--blue);padding:0 8px;width:64px;text-align:center;background:transparent;border:none;outline:none;font-family:var(--font);-moz-appearance:textfield}
+.qty-val::-webkit-outer-spin-button,.qty-val::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .qty-warn{font-size:12px;font-weight:600;color:var(--orange)}
 /* note */
 .note-wrap{display:flex;flex-direction:column;gap:4px}
@@ -455,7 +456,7 @@ body{
         <div class="label" id="qty-label">Quantidade encontrada</div>
         <div class="qty-row">
           <button class="qty-btn" onclick="changeQty(-1)">−</button>
-          <div class="qty-val" id="qty-val">1</div>
+          <input class="qty-val" id="qty-val" type="number" inputmode="numeric" min="0" value="1" oninput="setQty(this.value)">
           <button class="qty-btn" onclick="changeQty(1)">+</button>
         </div>
         <div class="qty-warn" id="qty-warn" style="display:none"></div>
@@ -1598,7 +1599,7 @@ function renderItem(){
   } else {
     qw.style.display='block';
     const exp=expQty(item.name); S.currentQty=exp;
-    document.getElementById('qty-val').textContent=exp;
+    document.getElementById('qty-val').value=exp;
     document.getElementById('qty-label').textContent=
       PER_GUEST.has(item.name)&&S.guests?`Quantidade (esperado: ${exp} para ${S.guests} hóspedes)`:'Quantidade encontrada';
     document.getElementById('qty-warn').style.display='none';
@@ -1631,14 +1632,20 @@ function renderItem(){
   if(noPhoto) S.currentItemHasPhoto=true;
 }
 
-function changeQty(delta){
-  S.currentQty=Math.max(0,S.currentQty+delta);
-  document.getElementById('qty-val').textContent=S.currentQty;
+function updateQtyWarn(){
   const exp=expQty(curItem().name);
   const warn=document.getElementById('qty-warn');
-  if(S.currentQty<exp){warn.style.display='block';warn.textContent=`⚠ Abaixo do esperado para ${S.guests} hóspedes (${exp})`;
-  }else{warn.style.display='none';}
+  if(!warn) return;
+  if(S.currentQty<exp){warn.style.display='block';warn.textContent=`⚠ Abaixo do esperado para ${S.guests} hóspedes (${exp})`;}
+  else{warn.style.display='none';}
 }
+function setQty(v){
+  let n=parseInt(v,10); if(isNaN(n)||n<0) n=0;
+  S.currentQty=n;
+  const el=document.getElementById('qty-val'); if(el && el.value!==String(n)) el.value=n;
+  updateQtyWarn();
+}
+function changeQty(delta){ setQty(Math.max(0,(S.currentQty||0)+delta)); }
 
 const AFFIRM_OK=['Anotado!','Boa!','Show!','Isso!','Beleza!','Mandou bem!'];
 const AFFIRM_RES=['Anotei a ressalva, tá?','Beleza, registrei aqui.','Ok, vou anotar isso.'];
