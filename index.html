@@ -121,6 +121,11 @@ body{
 .btn-foto:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-lt)}
 .btn-foto:active{transform:scale(.97)}
 .foto-grid{display:flex;flex-wrap:wrap;gap:8px}
+/* reconhecimento de voz desativado — esconde toda UI de microfone */
+#sonar-wrap,#ba-sonar,#gq-sonar{display:none!important}
+/* chips de utensílios (tocar = marcar ausente) */
+.ba-chip{background:var(--input);border:1.5px solid var(--border);border-radius:var(--rfull);padding:6px 12px;font-size:12px;font-weight:600;color:var(--navy);cursor:pointer;font-family:var(--font);-webkit-tap-highlight-color:transparent}
+.ba-chip.missing{background:#FEF2F2;border-color:#E7000B;color:#E7000B;text-decoration:line-through}
 .foto-thumb{position:relative;width:76px;height:76px;border-radius:8px;overflow:hidden;border:1.5px solid var(--border);flex-shrink:0}
 .foto-thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .foto-badge{position:absolute;bottom:3px;right:3px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
@@ -358,7 +363,7 @@ body{
       <div class="voice-status" id="ba-status">Aguardando…</div>
       <div class="voice-transcript" id="ba-transcript"></div>
     </div>
-    <button class="btn btn-primary" id="ba-confirm-btn" onclick="confirmBatch()" style="display:none">✅ Tudo OK, continuar</button>
+    <button class="btn btn-primary" id="ba-confirm-btn" onclick="confirmBatch()" style="display:none">✅ Confirmar utensílios</button>
     <button class="btn btn-ghost" id="ba-retake-btn" onclick="retakeBatch()" style="display:none" style="margin-top:-4px">🔄 Tirar foto novamente</button>
   </div>
 </div>
@@ -406,16 +411,16 @@ body{
   <!-- Steps que surgem após o intro -->
   <div class="intro-steps" id="intro-steps-wrap" style="display:none">
     <div class="intro-step" id="step-1">
-      <div class="step-ico">🎤</div>
-      <div class="step-body"><h4>Fale a condição do item</h4><p>Descreva em voz alta — anoto automaticamente como observação.</p></div>
+      <div class="step-ico">📷</div>
+      <div class="step-body"><h4>Fotografe o item</h4><p>Foto é obrigatória. Se tiver problema, tire mais de uma. Só item ausente é exceção.</p></div>
     </div>
     <div class="intro-step" id="step-2">
-      <div class="step-ico">📷</div>
-      <div class="step-body"><h4>Fotografe (obrigatório)</h4><p>Toda confirmação exige foto. Itens ausentes são a única exceção.</p></div>
+      <div class="step-ico">👆</div>
+      <div class="step-body"><h4>Marque a condição</h4><p>Toque em <b>Bom</b>, <b>Ruim</b> ou <b>Ausente</b>. Isso já avança pro próximo item.</p></div>
     </div>
     <div class="intro-step" id="step-3">
-      <div class="step-ico">✅</div>
-      <div class="step-body"><h4>Diga "pronto" para confirmar</h4><p>Após a foto, digo o próximo item automaticamente.</p></div>
+      <div class="step-ico">📝</div>
+      <div class="step-body"><h4>Observação (opcional)</h4><p>Se quiser, escreva um detalhe sobre o item antes de marcar.</p></div>
     </div>
   </div>
 
@@ -492,8 +497,8 @@ body{
     </div>
 
     <div class="status-btns">
-      <button class="btn-status ok"       onclick="mark('ok')">      <span>✓</span>OK</button>
-      <button class="btn-status ressalva" onclick="mark('ressalva')"><span>⚠</span>Ressalva</button>
+      <button class="btn-status ok"       onclick="mark('ok')">      <span>✓</span>Bom</button>
+      <button class="btn-status ressalva" onclick="mark('ressalva')"><span>⚠</span>Ruim</button>
       <button class="btn-status ausente"  onclick="mark('ausente')"> <span>✗</span>Ausente</button>
     </div>
   </div>
@@ -516,7 +521,7 @@ body{
   </div>
   <div class="card" style="background:#FFF7ED;border-color:#FF8904;gap:6px">
     <div class="label" style="color:#FF8904">⚠️ Atenção — dados importantes pro anúncio</div>
-    <div style="font-size:12px;color:var(--navy);line-height:1.5">Responda com calma: essas informações vão direto pro anúncio do imóvel. Toque na opção certa <b>ou</b> use o microfone pra responder por voz.</div>
+    <div style="font-size:12px;color:var(--navy);line-height:1.5">Responda com calma: essas informações vão direto pro anúncio do imóvel. Toque na opção certa de cada pergunta.</div>
   </div>
   <div class="sonar-wrap" id="gq-sonar" style="padding:6px 0 2px">
     <button class="mic-btn" id="gq-mic" onclick="toggleGqListen()">🎤</button>
@@ -732,7 +737,7 @@ const S={
   mode:'entrada', prevResults:[], batchDone:{}, currentLocCoords:null, currentSpec:{},
   geralAnswers:{}, geralQuestDone:false
 };
-const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+const SpeechRec=null; // reconhecimento de voz DESATIVADO — tudo por clique (a voz da Monica continua)
 
 // ── HELPERS ───────────────────────────────────────────────────
 function curEnv(){return S.tpl.environments[S.envIdx]}
@@ -953,8 +958,9 @@ function itemPrompt(itemName){
   const instruction=TEST_INSTRUCTIONS[itemName];
   const mandAviso=MANDATORY_ITEMS.has(itemName)?' Item obrigatório pra ativação.':'';
   const specAsk=(typeof ITEM_SPECS!=='undefined'&&ITEM_SPECS[itemName])?' '+ITEM_SPECS[itemName].prompt:'';
-  if(instruction) return `${itemName}.${mandAviso} ${instruction}${specAsk}`;
-  return itemName+(mandAviso?'.'+mandAviso:'')+specAsk;
+  const cond=' Tira a foto e marca: tá bom, ruim ou ausente?';
+  if(instruction) return `${itemName}.${mandAviso} ${instruction}${specAsk}${cond}`;
+  return itemName+(mandAviso?'.'+mandAviso:'')+specAsk+cond;
 }
 
 function itemCategoryLabel(name){
@@ -1083,7 +1089,7 @@ function captureLocation(){
 }
 
 // ── BATCH PHOTO (utensílios) ──────────────────────────────────
-let _batchRec=null,_batchListening=false;
+let _batchRec=null,_batchListening=false,_batchMissing=new Set();
 
 function startBatchCapture(){
   const env=curEnv();
@@ -1097,13 +1103,22 @@ function startBatchCapture(){
   document.getElementById('ba-foto-grid').innerHTML='';
   document.getElementById('ba-btn-foto').className='btn-foto required';
   document.getElementById('ba-transcript').textContent='';
+  _batchMissing=new Set();
   const list=document.getElementById('ba-items-list');list.innerHTML='';
   batchItems.forEach(item=>{
-    const chip=document.createElement('span');
-    chip.style.cssText='background:var(--input);border:1px solid var(--border);border-radius:var(--rfull);padding:3px 10px;font-size:11px;font-weight:600;color:var(--muted)';
-    chip.textContent=item.name;list.appendChild(chip);
+    const chip=document.createElement('button');
+    chip.type='button';
+    chip.className='ba-chip';
+    chip.dataset.name=item.name;
+    chip.textContent=item.name;
+    chip.onclick=()=>toggleBatchMissing(item.name,chip);
+    list.appendChild(chip);
   });
-  ia('Agora a gente registra os utensílios da cozinha. Uma foto só — gaveta aberta, prateleira, escorredor, tábua. Tudo junto, né?');
+  ia('Agora a gente registra os utensílios da cozinha numa foto só — gaveta aberta, prateleira, escorredor, tábua, tudo junto. Se faltar algum, é só tocar nele na lista pra marcar como ausente.');
+}
+function toggleBatchMissing(name,chip){
+  if(_batchMissing.has(name)){_batchMissing.delete(name);chip.classList.remove('missing');}
+  else{_batchMissing.add(name);chip.classList.add('missing');}
 }
 
 function onBatchPhotoSelected(e){
@@ -1119,11 +1134,8 @@ function onBatchPhotoSelected(e){
   document.getElementById('ba-btn-foto').className='btn-foto';
   document.getElementById('ba-confirm-btn').style.display='block';
   document.getElementById('ba-retake-btn').style.display='block';
-  document.getElementById('ba-sonar').style.display='flex';
-  document.getElementById('ba-status').textContent='🎤 Diz "pronto" se tiver tudo, ou fala o que faltou';
-  ia('Ficou boa? Se tiver tudo, diz pronto. Se faltar alguma coisa, fala o que não tá lá.',()=>{
-    if(SpeechRec) startBatchListen();
-  });
+  document.getElementById('ba-status').textContent='Faltou algum? Toque nele na lista. Depois confirme.';
+  ia('Ficou boa? Se faltar algum utensílio, toca nele na lista pra marcar como ausente. Depois é só confirmar.');
 }
 
 function startBatchListen(){
@@ -1150,8 +1162,8 @@ function startBatchListen(){
 function stopBatchListen(){_batchListening=false;if(_batchRec){_batchRec.abort();_batchRec=null;}document.getElementById('ba-sonar').classList.remove('listening');}
 function toggleBatchListen(){if(_batchListening)stopBatchListen();else startBatchListen();}
 
-function confirmBatch(missing=[]){
-  stopBatchListen();
+function confirmBatch(missing){
+  if(!missing) missing=Array.from(_batchMissing||[]);
   const env=curEnv();
   const batchItems=env.items.filter(i=>BATCH_ITEMS.has(i.name));
   batchItems.forEach(item=>{
@@ -1173,7 +1185,7 @@ function confirmBatch(missing=[]){
       document.getElementById('env-done-wrap').style.display='none';
       document.getElementById('fab').classList.add('visible');
       show('s-inspect');renderItem();
-      ia(itemPrompt(curItem().name),()=>{if(SpeechRec)startListening();});
+      ia(itemPrompt(curItem().name));
     }
   });
 }
@@ -1453,12 +1465,12 @@ const STEP_SCRIPTS=[
 ];
 
 // Explicação inicial como UMA fala contínua (sem pausas), no tom da Monica.
-const FULL_INTRO=`Oi! Vistoria bem feita é o que separa um imóvel que fatura do que gera reclamação, né? Então bora juntas, que é rapidinho. Funciona assim: pra cada item, você fala como tá — bom, com ressalva ou ausente — que eu já anoto aqui. A foto é obrigatória, viu? Item sem foto não avança; só os ausentes que são exceção. E quando terminar, é só dizer "pronto" que a gente já passa pro próximo, automático. Assim a vistoria fica registrada de verdade, sem deixar nada pra trás. Bora começar!`;
+const FULL_INTRO=`Oi! Vistoria bem feita é o que separa um imóvel que fatura do que gera reclamação, né? Então bora juntas, que é rapidinho. Funciona assim: pra cada item, você tira a foto — e se tiver algum problema, pode tirar mais de uma, viu? Foto é obrigatória; só item ausente é exceção. Depois é só tocar em bom, ruim ou ausente, que eu já passo pro próximo item, automático. Se quiser, dá pra escrever uma observação antes de marcar. Simples assim, sem deixar nada pra trás. Bora começar!`;
 // marcadores pra revelar cada card no instante em que ela fala aquela parte
 const _introCards=[
-  {step:'step-1', at:'pra cada item'},
-  {step:'step-2', at:'a foto é obrigatória'},
-  {step:'step-3', at:'é só dizer'},
+  {step:'step-1', at:'você tira a foto'},
+  {step:'step-2', at:'tocar em bom'},
+  {step:'step-3', at:'escrever uma observação'},
 ];
 
 let _wordTimer=null;
@@ -1918,7 +1930,7 @@ function startGeralQuest(){
   document.getElementById('fab').classList.remove('visible');
   buildGeralQuest();
   const nome=S.name?S.name.split(' ')[0]:'';
-  const fala=`${nome?nome+', a':'A'}gora preciso da sua atenção, viu? Esses próximos dados são importantes pro anúncio do imóvel. Vai com calma — pra cada pergunta, toca na opção certa ou me responde por voz.`;
+  const fala=`${nome?nome+', a':'A'}gora preciso da sua atenção, viu? Esses próximos dados são importantes pro anúncio do imóvel. Vai com calma — pra cada pergunta, toca na opção certa.`;
   const el=document.getElementById('gq-speech');el.textContent='';
   const words=fala.split(' ');let i=0;
   const wt=setInterval(()=>{if(i<words.length)el.textContent=words.slice(0,++i).join(' ');else clearInterval(wt);},90);
@@ -2132,10 +2144,9 @@ async function onFotoSelected(e){
   // Conta fotos deste item e adapta a fala (mais fotos se houver problema)
   const n=document.querySelectorAll('#foto-grid .foto-thumb').length;
   const msg = n>1
-    ? `Mais uma foto registrada. Se quiser, tira mais — quanto mais detalhe do problema, melhor. Ou diz pronto.`
-    : `Foto registrada. Se o item tiver algum problema, pode tirar mais fotos. Ou diz pronto pra avançar.`;
+    ? `Mais uma foto. Quanto mais detalhe do problema, melhor. Quando terminar, marca: bom, ruim ou ausente.`
+    : `Foto registrada. Se tiver problema, pode tirar mais. Agora marca: bom, ruim ou ausente.`;
   ia(msg);
-  if(SpeechRec&&!S.listening) startListening();
 }
 
 function addThumb(id,src){
@@ -2312,7 +2323,7 @@ async function buildReportHTML(){
   const sColor={ok:'#059669',ressalva:'#FF8904',ausente:'#E7000B'};
   const sBg={ok:'#ECFDF5',ressalva:'#FFF7ED',ausente:'#FEF2F2'};
   const sIcon={ok:'✓',ressalva:'⚠',ausente:'✗'};
-  const sLabel={ok:'OK',ressalva:'Ressalva',ausente:'Ausente'};
+  const sLabel={ok:'Bom',ressalva:'Ruim',ausente:'Ausente'};
 
   // Itens mínimos faltantes
   const missingMand=getMissingMandatory(allResults);
