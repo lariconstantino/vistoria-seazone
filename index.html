@@ -763,21 +763,37 @@ function getMonicaAudio(){
   if(!_monicaAudio){ _monicaAudio=new Audio(); _monicaAudio.playsInline=true; _monicaAudio.preload='auto'; }
   return _monicaAudio;
 }
+const ELEVEN_BODY=text=>JSON.stringify({
+  text,
+  model_id:'eleven_turbo_v2_5', // baixa latência (pt-BR) — reduz o delay até a fala começar
+  voice_settings:{stability:0.55,similarity_boost:0.88,style:0.3,use_speaker_boost:true}
+});
+// Cache de fala — pré-carrega o áudio (ex: abertura) pra tocar INSTANTÂNEO no clique
+const _speechCache={}, _speechInflight={};
+async function prefetchSpeech(text){
+  if(!ELEVEN_API_KEY||!MONICA_VOICE_ID||!text) return;
+  if(_speechCache[text]||_speechInflight[text]) return;
+  _speechInflight[text]=true;
+  try{
+    const res=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${MONICA_VOICE_ID}/stream`,{
+      method:'POST',headers:{'xi-api-key':ELEVEN_API_KEY,'Content-Type':'application/json'},body:ELEVEN_BODY(text)});
+    if(res.ok){ const blob=await res.blob(); _speechCache[text]=URL.createObjectURL(blob); }
+  }catch{}
+  _speechInflight[text]=false;
+}
+
 async function speakElevenLabs(text){
   if(!ELEVEN_API_KEY||!MONICA_VOICE_ID) return false;
   try{
-    const res=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${MONICA_VOICE_ID}/stream`,{
-      method:'POST',
-      headers:{'xi-api-key':ELEVEN_API_KEY,'Content-Type':'application/json'},
-      body:JSON.stringify({
-        text,
-        model_id:'eleven_turbo_v2_5', // baixa latência (pt-BR) — reduz o delay até a fala começar
-        voice_settings:{stability:0.55,similarity_boost:0.88,style:0.3,use_speaker_boost:true}
-      })
-    });
-    if(!res.ok) return false;
-    const blob=await res.blob();
-    const url=URL.createObjectURL(blob);
+    let url=_speechCache[text];
+    if(url){ delete _speechCache[text]; }   // usa o pré-carregado (instantâneo)
+    else{
+      const res=await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${MONICA_VOICE_ID}/stream`,{
+        method:'POST',headers:{'xi-api-key':ELEVEN_API_KEY,'Content-Type':'application/json'},body:ELEVEN_BODY(text)});
+      if(!res.ok) return false;
+      const blob=await res.blob();
+      url=URL.createObjectURL(blob);
+    }
     return new Promise(resolve=>{
       const a=getMonicaAudio();
       currentAudio=a;
@@ -866,6 +882,8 @@ function unlockMedia(){
   }catch{}
 }
 ['pointerdown','touchend','click'].forEach(evt=>document.addEventListener(evt,unlockMedia,{once:true,passive:true}));
+// pré-carrega a fala de abertura assim que a página estiver pronta (toca instantâneo no clique de Iniciar)
+window.addEventListener('load',()=>{setTimeout(()=>{if(typeof FULL_INTRO!=='undefined')prefetchSpeech(FULL_INTRO);},300);});
 
 // ── ENGINE DE VOZ ──────────────────────────────────────────────
 let speechQueue=[];
@@ -1482,6 +1500,8 @@ function showIntro(){
     const speechEl=document.getElementById('intro-speech-text');
     speechEl.textContent='';
     startIntroBars();
+    // garante mídia destravada (caso o clique não tenha disparado o unlock antes)
+    if(typeof unlockMedia==='function') unlockMedia();
 
     // Texto progride com a fala
     const words=FULL_INTRO.split(' ');
@@ -1509,7 +1529,7 @@ function showIntro(){
       ['step-1','step-2','step-3'].forEach(id=>document.getElementById(id).classList.add('show'));
       document.getElementById('btn-intro-start').style.display='block';
     });
-  },300);
+  },50);
 }
 
 function iniciarVistoriaAposIntro(){
