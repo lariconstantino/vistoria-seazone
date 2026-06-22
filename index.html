@@ -357,7 +357,7 @@ body{
 <!-- PROPERTY DISCOVERY -->
 <div id="s-property-desc" class="screen">
   <div class="intro-placeholder">
-    <div class="intro-placeholder-icon" data-avatar><video loop muted playsinline preload="auto" src="monica.mp4"></video></div>
+    <div class="intro-placeholder-icon" data-avatar><video autoplay loop muted playsinline preload="auto" src="monica.mp4"></video></div>
     <div class="intro-voice-bars" id="pd-bars">
       <div class="ivbar" id="pb0"></div><div class="ivbar" id="pb1"></div>
       <div class="ivbar" id="pb2"></div><div class="ivbar" id="pb3"></div>
@@ -382,7 +382,7 @@ body{
 <div id="s-intro" class="screen">
 
   <div class="intro-placeholder">
-    <div class="intro-placeholder-icon" data-avatar><video loop muted playsinline preload="auto" src="monica.mp4"></video></div>
+    <div class="intro-placeholder-icon" data-avatar><video autoplay loop muted playsinline preload="auto" src="monica.mp4"></video></div>
     <!-- Barras de voz -->
     <div class="intro-voice-bars" id="intro-bars">
       <div class="ivbar" id="ib0"></div><div class="ivbar" id="ib1"></div>
@@ -762,7 +762,10 @@ window.speechSynthesis.addEventListener('voiceschanged',loadVoices);
 loadVoices();
 initMonicaAvatars();
 // Avatar fica parado (1º frame) até a Monica falar. Sincroniza vídeo ↔ áudio.
+// _avatarTalking decide se o vídeo deve rodar; desacopla do flag de UI da fala.
+let _avatarTalking=false;
 function startAvatarTalk(){
+  _avatarTalking=true;
   document.querySelectorAll('[data-avatar]').forEach(a=>a.classList.add('speaking'));
   document.querySelectorAll('[data-avatar] video').forEach(v=>{
     try{v.currentTime=0;}catch{}
@@ -771,6 +774,7 @@ function startAvatarTalk(){
   });
 }
 function stopAvatarTalk(){
+  _avatarTalking=false;
   document.querySelectorAll('[data-avatar]').forEach(a=>a.classList.remove('speaking'));
   document.querySelectorAll('[data-avatar] video').forEach(v=>{
     v.pause();
@@ -784,11 +788,18 @@ function silenceMonica(){
   speechQueue=[];speaking=false;
   stopAvatarTalk();
 }
-// garante 1º frame visível sem reprodução automática
+// garante 1º frame visível: autoplay mudo pinta o frame (permitido no mobile), depois congela.
+// Sem isso, em iOS/Android o vídeo pausado que nunca tocou aparece preto.
 document.querySelectorAll('[data-avatar] video').forEach(v=>{
-  const freeze=()=>{if(!S.iaSpeaking){v.pause();try{v.currentTime=0;}catch{}}};
+  const freeze=()=>{if(!_avatarTalking){try{v.currentTime=0;}catch{}v.pause();}};
   v.addEventListener('loadeddata',freeze);
   v.addEventListener('loadedmetadata',freeze);
+  // o autoplay inicial dispara 'play'; deixa pintar ~1 frame e pausa (a não ser que a Monica esteja falando)
+  v.addEventListener('play',()=>{if(!_avatarTalking)setTimeout(freeze,80);});
+  // tenta iniciar mudo p/ forçar o paint do frame (fallback se o atributo autoplay não pegar)
+  const kick=()=>{if(!_avatarTalking){const p=v.play();if(p&&p.catch)p.catch(()=>{});}};
+  v.addEventListener('loadedmetadata',kick);
+  setTimeout(kick,300);
 });
 
 // ── ENGINE DE VOZ ──────────────────────────────────────────────
