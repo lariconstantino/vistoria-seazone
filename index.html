@@ -67,7 +67,11 @@ body{
 .env-dot{width:8px;height:8px;border-radius:50%;background:var(--muted-bg);margin-left:10px;flex-shrink:0}
 .env-row.done .env-dot{background:var(--green)}.env-row.partial .env-dot{background:var(--orange)}
 /* progress */
-.prog-header{display:flex;justify-content:space-between;align-items:center}
+.prog-header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.btn-voltar{background:transparent;border:1.5px solid var(--border);border-radius:var(--rfull);color:var(--muted);font-family:var(--font);font-size:12px;font-weight:700;padding:5px 12px;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.btn-voltar:hover,.btn-voltar:active{border-color:var(--blue);color:var(--blue)}
+.edit-env-chip{background:var(--blue-lt);border:1.5px solid var(--blue-100);border-radius:var(--rfull);color:var(--navy);font-family:var(--font);font-size:13px;font-weight:600;padding:8px 14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.edit-env-chip:hover{border-color:var(--blue);color:var(--blue)}
 .track{height:5px;background:var(--muted-bg);border-radius:var(--rfull);overflow:hidden}
 .fill{height:100%;background:var(--blue);border-radius:var(--rfull);transition:width .4s ease}
 .env-badge{display:inline-flex;align-items:center;gap:5px;background:var(--blue-lt);border:1px solid var(--blue-100);border-radius:var(--rfull);padding:5px 12px 5px 8px;font-size:12px;font-weight:600;color:var(--blue)}
@@ -391,6 +395,7 @@ body{
 <!-- GRUPO DE ITENS (1 foto cobre o grupo; marca cada item) -->
 <div id="s-group" class="screen">
   <div class="prog-header">
+    <button class="btn-voltar" onclick="goBack()">◀ Voltar</button>
     <span class="small" style="color:var(--muted)" id="grp-env-lbl"></span>
     <span class="env-badge"><span class="env-badge-dot"></span><span id="grp-env-name"></span></span>
   </div>
@@ -467,6 +472,7 @@ body{
 <!-- INSPECT -->
 <div id="s-inspect" class="screen">
   <div class="prog-header">
+    <button class="btn-voltar" onclick="goBack()">◀ Voltar</button>
     <span class="small" style="color:var(--muted)" id="ip-env-lbl"></span>
     <span class="small" style="color:var(--blue);font-weight:700" id="ip-item-cnt"></span>
   </div>
@@ -613,6 +619,11 @@ body{
     <div class="manut-title">🔧 Encaminhamentos de manutenção</div>
     <div id="sum-manut-body"></div>
   </div>
+  <div class="card" style="gap:8px">
+    <div class="label">✏️ Precisa corrigir algum cômodo?</div>
+    <div style="font-size:12px;color:var(--muted);line-height:1.4">Toque no ambiente pra revisar. Re-registre só o que mudar — o resto fica salvo.</div>
+    <div id="sum-edit-envs" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+  </div>
   <button class="btn btn-primary" onclick="gerarRelatorioHTML()">📄 Gerar relatório HTML</button>
   <button class="btn btn-secondary" style="margin-top:-4px" onclick="copyReport()">Copiar resumo</button>
   <button class="btn btn-ghost" style="margin-top:-4px" onclick="restart()">Nova vistoria</button>
@@ -654,7 +665,7 @@ body{
 <script>
 // ── DATA ─────────────────────────────────────────────────────
 const STRUCTURAL=new Set(['Piso','Parede','Teto','Porta','Janelas','Janela','Cortina','Lâmpadas','Interruptores/tomadas','Ralo','Box','Exaustor','Lareira interna','Guarda-corpo','Interfone','Modem de internet','Wi-fi','Quadro de luz','Voltagem','Pin de localização','Tour pelo imóvel','Capacidade de hóspedes','Itens pessoais do proprietário','Tela de proteção','Depurador de Ar']);
-const PER_GUEST=new Set(['Travesseiros','Garfos','Facas','Colheres de sopa','Colheres de chá','Pratos grandes','Pratos fundos','Pratos de sobremesa','Copos de vidro','Taças de vinho','Xícaras','Cabides','Enxoval','Pano de prato']);
+const PER_GUEST=new Set(['Garfos','Facas','Colheres de sopa','Colheres de chá','Pratos grandes','Pratos fundos','Pratos de sobremesa','Copos de vidro','Taças de vinho','Xícaras','Cabides','Enxoval','Pano de prato']);
 
 // Categorias para prompts de teste específicos
 const ELECTRONICS=new Set(['Televisão','Ventilador','Ar condicionado','Geladeira','Freezer (congelador)','Fogão','Forno','Microondas','Cafeteira','Liquidificador','Chaleira','Airfryer','Sanduicheira','Lava louça','Máquina de lavar','Secadora','Ferro de passar','Lâmpadas','Interruptores/tomadas','Exaustor','Modem de internet','Wi-fi','Secador de cabelo','Frigobar/Cervejeira/Adega','Depurador de Ar','Quadro de luz']);
@@ -801,7 +812,7 @@ const S={
   iaSpeaking:false, pendingAdvance:false,
   currentNote:'', currentItemHasPhoto:false,
   mode:'entrada', prevResults:[], batchDone:{}, currentLocCoords:null, currentSpec:{},
-  geralAnswers:{}, geralQuestDone:false
+  geralAnswers:{}, geralQuestDone:false, editMode:false, _advLock:0
 };
 const SpeechRec=null; // reconhecimento de voz DESATIVADO — tudo por clique (a voz da Monica continua)
 
@@ -813,7 +824,20 @@ function totalItems(){return S.tpl.environments.reduce((s,e)=>s+e.items.length,0
 function doneItems(){return S.results.filter(r=>!r.custom).length}
 // quantidade esperada: fixa (panelas), por hóspede, ou 1
 const FIXED_QTY={'Panelas':3,'Frigideira':1};
-function expQty(name){if(FIXED_QTY[name])return FIXED_QTY[name];return(!S.guests||!PER_GUEST.has(name))?1:S.guests}
+// Travesseiros: calculado pelas camas do ambiente — casal/queen/king = 4 por cama; solteiro/auxiliar e sofá-cama = 1.
+function bedPillows(envName){
+  let total=0;
+  S.results.filter(r=>r.env===envName&&!r.custom).forEach(r=>{
+    if(r.item==='Cama'){ const grande=/casal|queen|king/i.test(r.note||''); total+=(r.qty||1)*(grande?4:1); }
+    if(r.item==='Sofá'&&/sofá-cama/i.test(r.note||'')){ total+=(r.qty||1); }
+  });
+  return total;
+}
+function expQty(name){
+  if(FIXED_QTY[name])return FIXED_QTY[name];
+  if(name==='Travesseiros'){ const t=bedPillows(curEnv()?curEnv().name:''); return t>0?t:(S.guests||1); }
+  return(!S.guests||!PER_GUEST.has(name))?1:S.guests;
+}
 
 // ── GRUPOS DE ITENS (1 foto cobre o grupo; cada item marcado Bom/Ruim/Ausente) ──
 const ITEM_GROUPS=[
@@ -824,6 +848,7 @@ const ITEM_GROUPS=[
   {id:'utens', title:'Utensílios de cozinha', items:['Abridor de vinho e cerveja','Pegador de macarrão','Pano de prato','Colheres para cozinhar']},
   {id:'panelas', title:'Panelas e frigideira', items:['Panelas','Frigideira']},
   {id:'outros_coz', title:'Outros da cozinha', items:['Jarra de água','Lixeira de pia','Lixeira de lixo seco','Forma de alumínio']},
+  {id:'limpeza', title:'Limpeza (vassoura, rodo, pá e balde)', items:['Vassoura','Rodo','Pá de lixo','Balde']},
   {id:'tv', title:'Televisão + Controle', items:['Televisão','Controle da televisão']},
   {id:'ar', title:'Ar-condicionado + Controle', items:['Ar condicionado','Controle do ar condicionado']},
   {id:'acab', title:'Acabamento (piso, parede, teto)', items:['Piso','Parede','Teto','Quarto - Piso','Quarto - Parede','Quarto - Teto','Banheiro - Piso','Banheiro - Parede','Banheiro - Teto']},
@@ -1703,7 +1728,8 @@ function renderItem(){
     const exp=expQty(item.name); S.currentQty=exp;
     document.getElementById('qty-val').value=exp;
     document.getElementById('qty-label').textContent=
-      PER_GUEST.has(item.name)&&S.guests?`Quantidade (esperado: ${exp} para ${S.guests} hóspedes)`:'Quantidade encontrada';
+      item.name==='Travesseiros'?`Quantidade (esperado: ${exp} pelas camas do ambiente)`:
+      (PER_GUEST.has(item.name)&&S.guests?`Quantidade (esperado: ${exp} para ${S.guests} hóspedes)`:'Quantidade encontrada');
     document.getElementById('qty-warn').style.display='none';
   }
 
@@ -1933,7 +1959,7 @@ function confirmGroup(){
     const test=(status!=='ausente'&&itemTestType(it.name))?(S.groupTest&&S.groupTest[i]):null;
     let note=lowQty?`Abaixo do esperado (${exp})`:'';
     if(test) note=(TEST_LABEL[test])+(note?` — ${note}`:'');
-    S.results.push({env:curEnv().name,item:it.name,status:finalStatus,note,qty,expectedQty:exp,custom:false,lowQty,test});
+    recordResult({env:curEnv().name,item:it.name,status:finalStatus,note,qty,expectedQty:exp,custom:false,lowQty,test});
     addTimeline(it.name,finalStatus,note,qty,exp);
   });
   saveResults(S.prop,S.results);
@@ -1946,6 +1972,8 @@ function mark(status){
   if(S.pendingAdvance) return;
   // Trava anti-toque-duplo: ignora cliques por ~600ms após um avanço (evita pular 2 itens)
   if(performance.now()<(S._advLock||0)) return;
+  // Ausente: quantidade não é necessária — esconde o campo
+  if(status==='ausente'){ const qw=document.getElementById('qty-wrap'); if(qw) qw.style.display='none'; }
 
   // Trava: cama/sofá precisam de especificação antes de OK/Ressalva (ausente é exceção)
   if(status!=='ausente'&&!specComplete(curItem().name)){
@@ -1993,15 +2021,16 @@ function mark(status){
   const test=(status!=='ausente'&&_tt)?S.currentTest:null;
   if(test) note=(TEST_LABEL[test])+(note?` — ${note}`:'');
   const exp=expQty(item.name);
-  const lowQty=!isStruct(item.name)&&S.currentQty<exp&&status==='ok';
+  const qtyFinal=status==='ausente'?0:S.currentQty;   // ausente não tem quantidade
+  const lowQty=!isStruct(item.name)&&qtyFinal<exp&&status==='ok';
   const finalStatus=lowQty?'ressalva':status;
 
-  S.results.push({env:curEnv().name,item:item.name,status:finalStatus,note,qty:S.currentQty,expectedQty:exp,custom:false,lowQty,test});
+  recordResult({env:curEnv().name,item:item.name,status:finalStatus,note,qty:qtyFinal,expectedQty:exp,custom:false,lowQty,test});
   saveResults(S.prop,S.results);
   if(item.name==='Enxoval') setTimeout(()=>document.getElementById('central-aviso').style.display='flex',2200);
   document.querySelectorAll('.btn-status').forEach(b=>b.classList.remove('active'));
   document.querySelector(`.btn-status.${status}`).classList.add('active');
-  addTimeline(item.name,finalStatus,note,S.currentQty,exp);
+  addTimeline(item.name,finalStatus,note,qtyFinal,exp);
 
   const affirm=quickAffirm(finalStatus);
   stopListening();
@@ -2020,6 +2049,51 @@ function confirmItem(){
   mark(S.pendingStatus);   // foto já presente → mark finaliza e avança
 }
 
+// Gravação idempotente: re-marcar o mesmo item (ao voltar/editar) substitui em vez de duplicar.
+function recordResult(r){
+  S.results=S.results.filter(x=>!(x.env===r.env&&x.item===r.item&&!x.custom));
+  S.results.push(r);
+}
+
+// Reconstrói a timeline do ambiente atual a partir dos resultados já gravados.
+function rebuildTimeline(){
+  const tl=document.getElementById('timeline'); if(!tl) return; tl.innerHTML='';
+  const env=curEnv(); if(!env) return;
+  S.results.filter(r=>r.env===env.name).forEach(r=>addTimeline(r.item+(r.custom?' ✦':''),r.status,r.note,r.qty,r.expectedQty));
+}
+
+// Volta uma unidade (item ou grupo) — inclusive cruzando pro ambiente anterior.
+function goBack(){
+  silenceMonica();
+  document.getElementById('env-done-wrap').style.display='none';
+  if(S.itemIdx<=0){
+    if(S.editMode){ S.editMode=false; showSummary(); return; }   // revisão: volta ao resumo
+    if(S.envIdx<=0){ renderUnit(); return; }   // já no começo de tudo
+    S.envIdx--; const e=curEnv(); e._units=buildUnits(e.items); S.itemIdx=e._units.length-1;
+    buildEnvList();
+  } else {
+    S.itemIdx--;
+  }
+  S._advLock=0; S.pendingAdvance=false; S.pendingStatus=null;
+  rebuildTimeline();
+  renderUnit();
+  speakUnit('Voltando — pode corrigir o que precisar.');
+}
+
+// Reabre um ambiente já finalizado para revisão (a partir do resumo/overview).
+function editEnv(i){
+  silenceMonica();
+  S.editMode=true;
+  S.envIdx=i; S.itemIdx=0;
+  const env=curEnv(); env._units=buildUnits(env.items);
+  document.getElementById('timeline').innerHTML='';
+  document.getElementById('env-done-wrap').style.display='none';
+  rebuildTimeline();
+  buildEnvList();
+  renderUnit();
+  speakUnit('Revisando o '+env.name+' — re-registra só o que mudar.');
+}
+
 function showEnvDone(){
   const env=curEnv();
   const res=S.results.filter(r=>r.env===env.name);
@@ -2029,7 +2103,9 @@ function showEnvDone(){
 
   document.getElementById('env-done-wrap').style.display='block';
   document.getElementById('env-done-msg').textContent=`${env.name} concluído · ${ok} OK${issues?` · ${issues} pendência(s)`:''}`;
-  document.getElementById('env-done-btn').textContent=isLast?'Ver resumo':'Próximo ambiente';
+  const edBtn=document.getElementById('env-done-btn');
+  if(S.editMode){ edBtn.textContent='Voltar ao resumo'; edBtn.onclick=()=>{S.editMode=false;showSummary();}; }
+  else { edBtn.textContent=isLast?'Ver resumo':'Próximo ambiente'; edBtn.onclick=nextEnv; }
   stopListening();
 
   const extra=' Antes de seguir: tem algum item a mais aqui que você quer registrar — algo decorativo ou fora da lista? Se tiver, toca em "Adicionar". Senão, bora!';
@@ -2206,10 +2282,10 @@ function addTimeline(name,status,note,qty,exp){
   const tl=document.getElementById('timeline');
   const icon=status==='ok'?'✓':status==='regular'?'~':status==='ressalva'?'⚠':'✗';
   const st=isStruct(name);
-  const lowQty=!st&&qty<exp;
+  const lowQty=!st&&status!=='ausente'&&qty<exp;
   const div=document.createElement('div');
   div.className=`tl-item ${status}`;
-  div.innerHTML=`<span class="tl-icon">${icon}</span><div><div class="tl-text">${name}${!st?`<span class="tl-qty">${qty}un.</span>`:''}${lowQty?`<span class="tl-low">▼</span>`:''}</div>${note?`<div class="small" style="color:var(--muted);font-style:italic">${note}</div>`:''}</div>`;
+  div.innerHTML=`<span class="tl-icon">${icon}</span><div><div class="tl-text">${name}${(!st&&status!=='ausente')?`<span class="tl-qty">${qty}un.</span>`:''}${lowQty?`<span class="tl-low">▼</span>`:''}</div>${note?`<div class="small" style="color:var(--muted);font-style:italic">${note}</div>`:''}</div>`;
   tl.appendChild(div);
   tl.scrollTop=tl.scrollHeight;
 }
@@ -2457,7 +2533,20 @@ function refreshEnvDone(){
 async function showSummary(){
   stopListening();
   silenceMonica();
+  S.editMode=false;
   document.getElementById('fab').classList.remove('visible');
+
+  // seletor de revisão de ambientes (editar cômodo já finalizado)
+  const editWrap=document.getElementById('sum-edit-envs');
+  if(editWrap){
+    editWrap.innerHTML='';
+    S.tpl.environments.forEach((e,i)=>{
+      const b=document.createElement('button');
+      b.type='button'; b.className='edit-env-chip'; b.textContent=e.name;
+      b.onclick=()=>editEnv(i);
+      editWrap.appendChild(b);
+    });
+  }
 
   const fotos=await getAllFotos();
   const ok=S.results.filter(r=>r.status==='ok').length;
@@ -2485,7 +2574,7 @@ async function showSummary(){
     items.forEach(r=>{
       const st=isStruct(r.item);
       const d=document.createElement('div');d.className=`sum-item ${key}`;
-      d.innerHTML=`<span>${icon}</span><div class="sum-item-body"><div class="sum-env">${r.env}</div><div class="sum-name">${r.item}${r.custom?' ✦':''}</div>${!st?`<div class="sum-qty-chip">${r.qty}/${r.expectedQty}</div>`:''}${r.note?`<div class="sum-note">${r.note}</div>`:''}</div>`;
+      d.innerHTML=`<span>${icon}</span><div class="sum-item-body"><div class="sum-env">${r.env}</div><div class="sum-name">${r.item}${r.custom?' ✦':''}</div>${(!st&&r.status!=='ausente')?`<div class="sum-qty-chip">${r.qty}/${r.expectedQty}</div>`:''}${r.note?`<div class="sum-note">${r.note}</div>`:''}</div>`;
       sec.appendChild(d);
     });
     list.appendChild(sec);
@@ -2803,7 +2892,7 @@ function copyReport(){navigator.clipboard.writeText(buildReport()).then(()=>{con
 
 function restart(){
   silenceMonica();
-  Object.assign(S,{name:'',prop:'',guests:0,tpl:null,envIdx:0,itemIdx:0,currentQty:1,results:[],fotos:[],listening:false,recognition:null,iaSpeaking:false,pendingAdvance:false,currentNote:'',currentItemHasPhoto:false,mode:'entrada',prevResults:[],batchDone:{},currentLocCoords:null,currentSpec:{},geralAnswers:{},geralQuestDone:false});
+  Object.assign(S,{name:'',prop:'',guests:0,tpl:null,envIdx:0,itemIdx:0,currentQty:1,results:[],fotos:[],listening:false,recognition:null,iaSpeaking:false,pendingAdvance:false,currentNote:'',currentItemHasPhoto:false,mode:'entrada',prevResults:[],batchDone:{},currentLocCoords:null,currentSpec:{},geralAnswers:{},geralQuestDone:false,editMode:false,_advLock:0});
   document.querySelectorAll('.tpl-card').forEach(c=>c.classList.remove('selected'));
   document.getElementById('tpl-grid').firstChild.click();
   ['inp-name','inp-prop','inp-guests'].forEach(id=>document.getElementById(id).value='');
