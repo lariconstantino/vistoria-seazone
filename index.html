@@ -500,6 +500,18 @@ body{
       <textarea id="note-input" placeholder="Estado, número, condição…"></textarea>
     </div>
 
+    <div class="spec-wrap" id="test-wrap" style="display:none">
+      <div class="spec-intro" id="test-intro"></div>
+      <div class="spec-chips" id="test-chips"></div>
+    </div>
+
+    <div class="label" style="margin-top:2px">Como está o item?</div>
+    <div class="status-btns">
+      <button class="btn-status ok"       onclick="mark('ok')">      <span>✓</span>Bom</button>
+      <button class="btn-status ressalva" onclick="mark('ressalva')"><span>⚠</span>Ruim</button>
+      <button class="btn-status ausente"  onclick="mark('ausente')"> <span>✗</span>Ausente</button>
+    </div>
+
     <div class="sonar-wrap" id="sonar-wrap">
       <div class="sonar-rings">
         <div class="sonar-ring"></div><div class="sonar-ring"></div><div class="sonar-ring"></div>
@@ -529,16 +541,6 @@ body{
       </div>
     </div>
 
-    <div class="spec-wrap" id="test-wrap" style="display:none">
-      <div class="spec-intro" id="test-intro"></div>
-      <div class="spec-chips" id="test-chips"></div>
-    </div>
-
-    <div class="status-btns">
-      <button class="btn-status ok"       onclick="mark('ok')">      <span>✓</span>Bom</button>
-      <button class="btn-status ressalva" onclick="mark('ressalva')"><span>⚠</span>Ruim</button>
-      <button class="btn-status ausente"  onclick="mark('ausente')"> <span>✗</span>Ausente</button>
-    </div>
   </div>
 
   <div id="env-done-wrap" style="display:none">
@@ -626,14 +628,14 @@ body{
   <div class="modal">
     <h3>Adicionar item que faltou</h3>
     <input id="modal-input" type="text" placeholder="Ex: Espelho decorativo, Quadro, Tapete"/>
-    <input type="file" id="mc-foto-input" accept="image/*" capture="environment" style="display:none" onchange="onCustomPhoto(event)"/>
-    <button class="btn-foto required" id="mc-btn-foto" onclick="document.getElementById('mc-foto-input').click()" style="margin-top:8px">📷 Tirar foto</button>
-    <div class="foto-grid" id="mc-foto-grid" style="margin-top:8px"></div>
     <div class="status-btns" style="margin-top:8px">
       <button class="btn-status ok"       id="mc-st-ok"  onclick="setCustomStatus('ok')"><span>✓</span>Bom</button>
       <button class="btn-status ressalva" id="mc-st-res" onclick="setCustomStatus('ressalva')"><span>⚠</span>Ruim</button>
       <button class="btn-status ausente"  id="mc-st-aus" onclick="setCustomStatus('ausente')"><span>✗</span>Ausente</button>
     </div>
+    <input type="file" id="mc-foto-input" accept="image/*" capture="environment" style="display:none" onchange="onCustomPhoto(event)"/>
+    <button class="btn-foto required" id="mc-btn-foto" onclick="document.getElementById('mc-foto-input').click()" style="margin-top:8px">📷 Tirar foto</button>
+    <div class="foto-grid" id="mc-foto-grid" style="margin-top:8px"></div>
     <div class="modal-btns">
       <button class="btn-mc" onclick="closeModal()">Cancelar</button>
       <button class="btn-mok" onclick="addCustom()">Adicionar</button>
@@ -1667,7 +1669,7 @@ function renderItem(){
   renderItemSpecs(item.name);
 
   // Teste (eletrônico/hidráulico): Funcionou/Estragado ou Sem/Com vazamento
-  S.currentTest=null;
+  S.currentTest=null; S.pendingStatus=null;
   const _tt=itemTestType(item.name);
   const tw=document.getElementById('test-wrap');
   if(_tt){
@@ -1920,18 +1922,6 @@ function confirmGroup(){
 function mark(status){
   if(S.pendingAdvance) return;
 
-  // Foto obrigatória para ok e ressalva — ausente é exceção
-  if(status!=='ausente'&&!S.currentItemHasPhoto){
-    const fotoBtn=document.getElementById('btn-foto-main');
-    const fotoObrig=document.getElementById('foto-obrig');
-    if(fotoBtn) fotoBtn.classList.add('required');
-    if(fotoObrig) fotoObrig.classList.add('visible');
-    // IA pede foto educadamente
-    silenceMonica();
-    ia('Falta a foto desse item. Sem foto a gente não avança.');
-    return;
-  }
-
   // Trava: cama/sofá precisam de especificação antes de OK/Ressalva (ausente é exceção)
   if(status!=='ausente'&&!specComplete(curItem().name)){
     const cfg=ITEM_SPECS[curItem().name];
@@ -1950,6 +1940,19 @@ function mark(status){
     return;
   }
 
+  // Foto obrigatória (ok/ressalva): se ainda não tirou, ARMA a escolha e pede a foto — ao fotografar confirma sozinho
+  if(status!=='ausente'&&!S.currentItemHasPhoto){
+    S.pendingStatus=status;
+    document.querySelectorAll('.status-btns .btn-status').forEach(b=>b.classList.remove('active'));
+    const sb=document.querySelector('.btn-status.'+status); if(sb) sb.classList.add('active');
+    const fotoBtn=document.getElementById('btn-foto-main'); if(fotoBtn) fotoBtn.classList.add('required');
+    const fotoObrig=document.getElementById('foto-obrig'); if(fotoObrig) fotoObrig.classList.add('visible');
+    silenceMonica();
+    ia('Boa! Agora tira a foto pra confirmar.');
+    return;
+  }
+
+  S.pendingStatus=null;
   S.pendingAdvance=true;
   const item=curItem();
   const noteRaw=(S.currentNote||document.getElementById('note-input').value).trim();
@@ -2325,40 +2328,42 @@ async function onFotoSelected(e){
   const file=e.target.files[0];
   if(!file) return;
   e.target.value='';
+  const item=curItem();
 
-  // Preview imediato
-  const previewUrl=URL.createObjectURL(file);
-  const thumbId='ft-'+Date.now();
-  addThumb(thumbId,previewUrl);
-
-  // Comprimir + salvar
-  const blob=await compressImage(file);
-  const id=await savePhoto(blob,{env:curEnv().name,item:curItem().name});
-
-  // Atualizar thumb
-  const thumb=document.getElementById(thumbId);
-  if(thumb){thumb.id=`ft-${id}`;const b=thumb.querySelector('.foto-badge');if(b)b.className='foto-badge synced';}
-
-  // Marcar que este item já tem foto — câmera não pulsa mais
+  // Marca JÁ que tem foto (evita corrida: salvar é assíncrono e demora em foto grande)
   S.currentItemHasPhoto=true;
   const fotoBtn=document.getElementById('btn-foto-main');
   const fotoObrig=document.getElementById('foto-obrig');
   if(fotoBtn){fotoBtn.classList.remove('required');fotoBtn.textContent='📷 Adicionar outra foto';}
   if(fotoObrig) fotoObrig.classList.remove('visible');
 
-  // Conta fotos deste item e adapta a fala (mais fotos se houver problema)
+  // Preview imediato (badge ⏳ → ✓)
+  const previewUrl=URL.createObjectURL(file);
+  const thumbId='ft-'+Date.now();
+  addThumb(thumbId,previewUrl);
+
+  // Comprimir + salvar em segundo plano
+  (async()=>{
+    try{
+      const blob=await compressImage(file);
+      const id=await savePhoto(blob,{env:(curEnv()&&curEnv().name),item:item.name});
+      const thumb=document.getElementById(thumbId);
+      if(thumb){const b=thumb.querySelector('.foto-badge');if(b){b.className='foto-badge synced';b.textContent='✓';}}
+    }catch(err){}
+  })();
+
+  // Se a condição já foi escolhida (Bom/Ruim) e faltava só a foto → confirma sozinho
+  if(S.pendingStatus){ const ps=S.pendingStatus; S.pendingStatus=null; mark(ps); return; }
+
   const n=document.querySelectorAll('#foto-grid .foto-thumb').length;
-  const msg = n>1
-    ? `Mais uma foto. Quanto mais detalhe do problema, melhor. Quando terminar, marca: bom, ruim ou ausente.`
-    : `Foto registrada. Se tiver problema, pode tirar mais. Agora marca: bom, ruim ou ausente.`;
-  ia(msg);
+  ia(n>1?'Mais uma foto. Quando terminar, marca: bom, ruim ou ausente.':'Foto registrada. Se tiver problema, pode tirar mais. Agora marca: bom, ruim ou ausente.');
 }
 
 function addThumb(id,src){
   const grid=document.getElementById('foto-grid');
   const div=document.createElement('div');
   div.className='foto-thumb';div.id=id;
-  div.innerHTML=`<img src="${src}"/><div class="foto-badge synced">✓</div>`;
+  div.innerHTML=`<img src="${src}"/><div class="foto-badge">⏳</div>`;
   grid.appendChild(div);
 }
 
@@ -2380,20 +2385,21 @@ function setCustomStatus(status){
   const id=status==='ok'?'mc-st-ok':status==='ressalva'?'mc-st-res':'mc-st-aus';
   document.getElementById(id).classList.add('active');
 }
-async function onCustomPhoto(e){
+function onCustomPhoto(e){
   const file=e.target.files[0]; if(!file) return; e.target.value='';
-  const url=URL.createObjectURL(file);
-  const div=document.createElement('div'); div.className='foto-thumb'; div.innerHTML=`<img src="${url}"/><div class="foto-badge synced">✓</div>`;
-  document.getElementById('mc-foto-grid').appendChild(div);
   document.getElementById('mc-btn-foto').classList.remove('required');
-  try{ _customBlobs.push(await compressImage(file)); }catch{}
+  const url=URL.createObjectURL(file);
+  const div=document.createElement('div'); div.className='foto-thumb'; div.innerHTML=`<img src="${url}"/><div class="foto-badge">⏳</div>`;
+  document.getElementById('mc-foto-grid').appendChild(div);
+  // guarda a PROMESSA (contador sobe na hora; salva quando pronto)
+  _customBlobs.push(compressImage(file).then(b=>{const bd=div.querySelector('.foto-badge');if(bd){bd.className='foto-badge synced';bd.textContent='✓';}return b;}).catch(()=>null));
 }
 async function addCustom(){
   const name=document.getElementById('modal-input').value.trim();
   if(!name){ ia('Escreve o nome do item antes de adicionar.'); return; }
   const status=_customStatus||'ok';
   if(status!=='ausente' && _customBlobs.length===0){ document.getElementById('mc-btn-foto').classList.add('required'); ia('Tira uma foto do item antes de adicionar.'); return; }
-  for(const b of _customBlobs){ try{ await savePhoto(b,{env:curEnv().name,item:name}); }catch{} }
+  for(const bp of _customBlobs){ try{ const b=await bp; if(b) await savePhoto(b,{env:curEnv().name,item:name}); }catch{} }
   S.results.push({env:curEnv().name,item:name,status,note:'Item extra',qty:1,expectedQty:1,custom:true,lowQty:false});
   addTimeline(`${name} ✦`,status,'Extra',1,1);
   saveResults(S.prop,S.results);
