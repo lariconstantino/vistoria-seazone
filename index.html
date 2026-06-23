@@ -546,6 +546,7 @@ body{
       <span class="env-done-txt" id="env-done-msg"></span>
       <button class="btn-next" id="env-done-btn" onclick="nextEnv()"></button>
     </div>
+    <button class="btn btn-ghost" id="env-extra-btn" onclick="openModal()" style="margin-top:8px">➕ Tem item a mais? Adicionar</button>
   </div>
 
   <div class="timeline" id="timeline"></div>
@@ -623,8 +624,16 @@ body{
 <!-- MODAL -->
 <div class="modal-bg" id="modal-bg" onclick="closeModal(event)">
   <div class="modal">
-    <h3>Adicionar item extra</h3>
-    <input id="modal-input" type="text" placeholder="Ex: Frigobar, Espelho extra"/>
+    <h3>Adicionar item que faltou</h3>
+    <input id="modal-input" type="text" placeholder="Ex: Espelho decorativo, Quadro, Tapete"/>
+    <input type="file" id="mc-foto-input" accept="image/*" capture="environment" style="display:none" onchange="onCustomPhoto(event)"/>
+    <button class="btn-foto required" id="mc-btn-foto" onclick="document.getElementById('mc-foto-input').click()" style="margin-top:8px">📷 Tirar foto</button>
+    <div class="foto-grid" id="mc-foto-grid" style="margin-top:8px"></div>
+    <div class="status-btns" style="margin-top:8px">
+      <button class="btn-status ok"       id="mc-st-ok"  onclick="setCustomStatus('ok')"><span>✓</span>Bom</button>
+      <button class="btn-status ressalva" id="mc-st-res" onclick="setCustomStatus('ressalva')"><span>⚠</span>Ruim</button>
+      <button class="btn-status ausente"  id="mc-st-aus" onclick="setCustomStatus('ausente')"><span>✗</span>Ausente</button>
+    </div>
     <div class="modal-btns">
       <button class="btn-mc" onclick="closeModal()">Cancelar</button>
       <button class="btn-mok" onclick="addCustom()">Adicionar</button>
@@ -1987,9 +1996,10 @@ function showEnvDone(){
   document.getElementById('env-done-btn').textContent=isLast?'Ver resumo':'Próximo ambiente';
   stopListening();
 
+  const extra=' Antes de seguir: tem algum item a mais aqui que você quer registrar — algo decorativo ou fora da lista? Se tiver, toca em "Adicionar". Senão, bora!';
   const msg=isLast
-    ?`${S.name?S.name.split(' ')[0]+', ':''}vistoria concluída! Você foi demais! ${S.results.length} itens registrados.`
-    :`Uou, terminou o ${env.name}! ${ok} itens conferidos, arrasou!`;
+    ?`${S.name?S.name.split(' ')[0]+', ':''}vistoria quase concluída! ${ok} itens conferidos aqui.${extra}`
+    :`Uou, terminou o ${env.name}! ${ok} itens conferidos.${extra}`;
   ia(msg);
   buildEnvList();
 }
@@ -2353,16 +2363,49 @@ function addThumb(id,src){
 }
 
 // ── CUSTOM ITEM ────────────────────────────────────────────────
-function openModal(){document.getElementById('modal-bg').classList.add('open');setTimeout(()=>document.getElementById('modal-input').focus(),100);}
-function closeModal(e){if(!e||e.target===document.getElementById('modal-bg'))document.getElementById('modal-bg').classList.remove('open');}
-function addCustom(){
-  const name=document.getElementById('modal-input').value.trim();
-  if(!name) return;
-  S.results.push({env:curEnv().name,item:name,status:'ok',note:'Item extra',qty:1,expectedQty:1,custom:true,lowQty:false});
-  addTimeline(`${name} ✦`,'ok','Extra',1,1);
+let _customStatus=null, _customBlobs=[];
+function openModal(){
+  _customStatus=null; _customBlobs=[];
   document.getElementById('modal-input').value='';
+  document.getElementById('mc-foto-grid').innerHTML='';
+  const fb=document.getElementById('mc-btn-foto'); fb.textContent='📷 Tirar foto'; fb.classList.add('required');
+  document.querySelectorAll('#modal-bg .btn-status').forEach(b=>b.classList.remove('active'));
+  document.getElementById('modal-bg').classList.add('open');
+  setTimeout(()=>document.getElementById('modal-input').focus(),100);
+}
+function closeModal(e){if(!e||e.target===document.getElementById('modal-bg'))document.getElementById('modal-bg').classList.remove('open');}
+function setCustomStatus(status){
+  _customStatus=status;
+  document.querySelectorAll('#modal-bg .btn-status').forEach(b=>b.classList.remove('active'));
+  const id=status==='ok'?'mc-st-ok':status==='ressalva'?'mc-st-res':'mc-st-aus';
+  document.getElementById(id).classList.add('active');
+}
+async function onCustomPhoto(e){
+  const file=e.target.files[0]; if(!file) return; e.target.value='';
+  const url=URL.createObjectURL(file);
+  const div=document.createElement('div'); div.className='foto-thumb'; div.innerHTML=`<img src="${url}"/><div class="foto-badge synced">✓</div>`;
+  document.getElementById('mc-foto-grid').appendChild(div);
+  document.getElementById('mc-btn-foto').classList.remove('required');
+  try{ _customBlobs.push(await compressImage(file)); }catch{}
+}
+async function addCustom(){
+  const name=document.getElementById('modal-input').value.trim();
+  if(!name){ ia('Escreve o nome do item antes de adicionar.'); return; }
+  const status=_customStatus||'ok';
+  if(status!=='ausente' && _customBlobs.length===0){ document.getElementById('mc-btn-foto').classList.add('required'); ia('Tira uma foto do item antes de adicionar.'); return; }
+  for(const b of _customBlobs){ try{ await savePhoto(b,{env:curEnv().name,item:name}); }catch{} }
+  S.results.push({env:curEnv().name,item:name,status,note:'Item extra',qty:1,expectedQty:1,custom:true,lowQty:false});
+  addTimeline(`${name} ✦`,status,'Extra',1,1);
+  saveResults(S.prop,S.results);
   closeModal();
-  ia(`${name} adicionado.`);
+  // atualiza a contagem do fim de ambiente se estiver visível
+  if(document.getElementById('env-done-wrap').style.display==='block') refreshEnvDone();
+  ia(`${name} adicionado! Quer registrar mais algum, ou bora pro próximo?`);
+}
+function refreshEnvDone(){
+  const env=curEnv(); const res=S.results.filter(r=>r.env===env.name);
+  const ok=res.filter(r=>r.status==='ok').length, issues=res.filter(r=>r.status!=='ok').length;
+  document.getElementById('env-done-msg').textContent=`${env.name} concluído · ${ok} OK${issues?` · ${issues} pendência(s)`:''}`;
 }
 
 // ── SUMMARY ───────────────────────────────────────────────────
