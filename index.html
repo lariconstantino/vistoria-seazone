@@ -529,6 +529,11 @@ body{
       </div>
     </div>
 
+    <div class="spec-wrap" id="test-wrap" style="display:none">
+      <div class="spec-intro" id="test-intro"></div>
+      <div class="spec-chips" id="test-chips"></div>
+    </div>
+
     <div class="status-btns">
       <button class="btn-status ok"       onclick="mark('ok')">      <span>✓</span>Bom</button>
       <button class="btn-status ressalva" onclick="mark('ressalva')"><span>⚠</span>Ruim</button>
@@ -672,6 +677,11 @@ function itemCategory(name){
   if(TESTABLE_STRUCT.has(name)) return 'struct-test';
   return 'inventory';
 }
+// Teste extra: eletrônico (Funcionou/Estragado) ou hidráulico (Sem/Com vazamento)
+function itemTestType(name){ if(HYDRAULIC.has(name)) return 'hydraulic'; if(ELECTRONICS.has(name)) return 'electronic'; return null; }
+function testOptions(type){ return type==='hydraulic'?[['sem_vazamento','Sem vazamento'],['com_vazamento','Com vazamento']]:[['funcionou','Funcionou'],['estragado','Estragado']]; }
+const TEST_LABEL={funcionou:'Funcionou',estragado:'Estragado',sem_vazamento:'Sem vazamento',com_vazamento:'Com vazamento'};
+function testAsk(type){ return type==='hydraulic'?' Testa e me diz: tem vazamento?':' Testa e me diz: funcionou?'; }
 
 // Instruções de teste por item específico
 const TEST_INSTRUCTIONS={
@@ -1029,9 +1039,11 @@ function itemPrompt(itemName){
   const instruction=TEST_INSTRUCTIONS[itemName];
   const mandAviso=MANDATORY_ITEMS.has(itemName)?' Item obrigatório pra ativação.':'';
   const specAsk=(typeof ITEM_SPECS!=='undefined'&&ITEM_SPECS[itemName])?' '+ITEM_SPECS[itemName].prompt:'';
+  const _tt=itemTestType(itemName);
+  const testPart=_tt?testAsk(_tt):'';
   const cond=' Tira a foto e marca: tá bom, ruim ou ausente?';
-  if(instruction) return `${itemName}.${mandAviso} ${instruction}${specAsk}${cond}`;
-  return itemName+(mandAviso?'.'+mandAviso:'')+specAsk+cond;
+  if(instruction) return `${itemName}.${mandAviso} ${instruction}${testPart}${specAsk}${cond}`;
+  return itemName+(mandAviso?'.'+mandAviso:'')+testPart+specAsk+cond;
 }
 
 function itemCategoryLabel(name){
@@ -1645,6 +1657,16 @@ function renderItem(){
   S.currentSpec={};
   renderItemSpecs(item.name);
 
+  // Teste (eletrônico/hidráulico): Funcionou/Estragado ou Sem/Com vazamento
+  S.currentTest=null;
+  const _tt=itemTestType(item.name);
+  const tw=document.getElementById('test-wrap');
+  if(_tt){
+    tw.style.display='flex'; tw.classList.remove('spec-required');
+    document.getElementById('test-intro').textContent = _tt==='hydraulic' ? '🚰 Testou? Tem vazamento?' : '⚡ Testou? Funcionou?';
+    document.getElementById('test-chips').innerHTML = testOptions(_tt).map(([v,l])=>`<button type="button" class="spec-chip" onclick="setTest('${v}')">${l}</button>`).join('');
+  } else { tw.style.display='none'; }
+
   // Qty
   const qw=document.getElementById('qty-wrap');
   if(isStruct(item.name)){
@@ -1699,6 +1721,11 @@ function setQty(v){
   updateQtyWarn();
 }
 function changeQty(delta){ setQty(Math.max(0,(S.currentQty||0)+delta)); }
+function setTest(v){
+  S.currentTest=v;
+  document.querySelectorAll('#test-chips .spec-chip').forEach(b=>b.classList.toggle('on', b.textContent.trim()===TEST_LABEL[v]));
+  document.getElementById('test-wrap').classList.remove('spec-required');
+}
 
 const AFFIRM_OK=['Anotado!','Boa!','Show!','Isso!','Beleza!','Mandou bem!'];
 const AFFIRM_RES=['Anotei a ressalva, tá?','Beleza, registrei aqui.','Ok, vou anotar isso.'];
@@ -1792,7 +1819,7 @@ let _groupPhotoCount=0;
 function renderGroup(unit){
   document.getElementById('fab').classList.remove('visible');
   show('s-group');
-  S._groupUnit=unit; S.groupStatus={}; S.groupQty={}; _groupPhotoCount=0;
+  S._groupUnit=unit; S.groupStatus={}; S.groupQty={}; S.groupTest={}; _groupPhotoCount=0;
   document.getElementById('grp-env-lbl').textContent=`Ambiente ${S.envIdx+1} de ${S.tpl.environments.length}`;
   document.getElementById('grp-env-name').textContent=curEnv().name;
   document.getElementById('grp-title').textContent=unit.group.title;
@@ -1807,6 +1834,12 @@ function buildGroupRows(){
     const hasQty=exp>1||!!FIXED_QTY[it.name];
     const st=S.groupStatus[i];
     const qv=S.groupQty[i]!=null?S.groupQty[i]:exp;
+    const tt=itemTestType(it.name);
+    const tv=S.groupTest&&S.groupTest[i];
+    const testHtml = tt ? `<div class="grp-test" style="margin-top:6px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px">${tt==='hydraulic'?'🚰 Testou? Vazamento:':'⚡ Testou? Funcionou:'}</div>
+        <div class="grp-status">${testOptions(tt).map(([v,l])=>`<button type="button" class="grp-st ${v==='estragado'||v==='com_vazamento'?'ressalva':'ok'}${tv===v?' on':''}" onclick="setGroupTest(${i},'${v}')">${l}</button>`).join('')}</div>
+      </div>` : '';
     const row=document.createElement('div'); row.className='grp-row';
     row.innerHTML=
       `<div class="grp-row-top">
@@ -1818,14 +1851,24 @@ function buildGroupRows(){
         <button type="button" class="grp-st ok${st==='ok'?' on':''}" onclick="setGroupStatus(${i},'ok')">Bom</button>
         <button type="button" class="grp-st ressalva${st==='ressalva'?' on':''}" onclick="setGroupStatus(${i},'ressalva')">Ruim</button>
         <button type="button" class="grp-st ausente${st==='ausente'?' on':''}" onclick="setGroupStatus(${i},'ausente')">Ausente</button>
-      </div>`;
+      </div>
+      ${testHtml}`;
     wrap.appendChild(row);
   });
   updateGroupNext();
 }
 function setGroupStatus(i,status){ S.groupStatus[i]=status; buildGroupRows(); }
 function setGroupQty(i,v){ let n=parseInt(v,10); if(isNaN(n)||n<0)n=0; S.groupQty[i]=n; }
-function updateGroupNext(){ const all=S._groupUnit.items.every((it,i)=>S.groupStatus[i]); const btn=document.getElementById('grp-next'); if(btn) btn.disabled=!all; }
+function setGroupTest(i,v){ if(!S.groupTest)S.groupTest={}; S.groupTest[i]=v; buildGroupRows(); }
+// teste obrigatório p/ eletrônico/hidráulico presente (não ausente)
+function groupTestComplete(){
+  return S._groupUnit.items.every((it,i)=>{
+    if(S.groupStatus[i]==='ausente') return true;
+    if(!itemTestType(it.name)) return true;
+    return !!(S.groupTest&&S.groupTest[i]);
+  });
+}
+function updateGroupNext(){ const all=S._groupUnit.items.every((it,i)=>S.groupStatus[i])&&groupTestComplete(); const btn=document.getElementById('grp-next'); if(btn) btn.disabled=!all; }
 async function onGroupPhoto(e){
   const file=e.target.files[0]; if(!file) return; e.target.value='';
   // conta a foto IMEDIATAMENTE (evita corrida: salvar é assíncrono e demora em foto grande)
@@ -1843,6 +1886,7 @@ async function onGroupPhoto(e){
 function confirmGroup(){
   const items=S._groupUnit.items;
   if(!items.every((it,i)=>S.groupStatus[i])){ silenceMonica(); ia('Marca a condição de cada item — bom, ruim ou ausente — antes de continuar.'); return; }
+  if(!groupTestComplete()){ silenceMonica(); ia('Testa os itens elétricos e hidráulicos e marca o resultado antes de continuar.'); return; }
   const anyPresent=items.some((it,i)=>S.groupStatus[i]!=='ausente');
   if(anyPresent && _groupPhotoCount===0){ silenceMonica(); ia('Falta a foto do grupo. Tira pelo menos uma pra registrar.'); document.getElementById('grp-btn-foto').classList.add('required'); return; }
   items.forEach((it,i)=>{
@@ -1852,8 +1896,11 @@ function confirmGroup(){
     let qty=status==='ausente'?0:(hasQty?(S.groupQty[i]!=null?S.groupQty[i]:exp):1);
     const lowQty=!isStruct(it.name)&&qty<exp&&status==='ok';
     const finalStatus=lowQty?'ressalva':status;
-    S.results.push({env:curEnv().name,item:it.name,status:finalStatus,note:lowQty?`Abaixo do esperado (${exp})`:'',qty,expectedQty:exp,custom:false,lowQty});
-    addTimeline(it.name,finalStatus,'',qty,exp);
+    const test=(status!=='ausente'&&itemTestType(it.name))?(S.groupTest&&S.groupTest[i]):null;
+    let note=lowQty?`Abaixo do esperado (${exp})`:'';
+    if(test) note=(TEST_LABEL[test])+(note?` — ${note}`:'');
+    S.results.push({env:curEnv().name,item:it.name,status:finalStatus,note,qty,expectedQty:exp,custom:false,lowQty,test});
+    addTimeline(it.name,finalStatus,note,qty,exp);
   });
   saveResults(S.prop,S.results);
   S.itemIdx++;
@@ -1885,6 +1932,15 @@ function mark(status){
     return;
   }
 
+  // Trava: eletrônico/hidráulico precisa do resultado do teste (ausente é exceção)
+  const _tt=itemTestType(curItem().name);
+  if(status!=='ausente'&&_tt&&!S.currentTest){
+    document.getElementById('test-wrap').classList.add('spec-required');
+    silenceMonica();
+    ia(_tt==='hydraulic'?'Testa o item e me diz: tem vazamento ou não?':'Testa o item e me diz: funcionou ou estragou?');
+    return;
+  }
+
   S.pendingAdvance=true;
   const item=curItem();
   const noteRaw=(S.currentNote||document.getElementById('note-input').value).trim();
@@ -1896,11 +1952,14 @@ function mark(status){
     const st=specToNote(item.name);
     note = st + (note?` — ${note}`:'');
   }
+  // anexa o resultado do teste (eletrônico/hidráulico)
+  const test=(status!=='ausente'&&_tt)?S.currentTest:null;
+  if(test) note=(TEST_LABEL[test])+(note?` — ${note}`:'');
   const exp=expQty(item.name);
   const lowQty=!isStruct(item.name)&&S.currentQty<exp&&status==='ok';
   const finalStatus=lowQty?'ressalva':status;
 
-  S.results.push({env:curEnv().name,item:item.name,status:finalStatus,note,qty:S.currentQty,expectedQty:exp,custom:false,lowQty});
+  S.results.push({env:curEnv().name,item:item.name,status:finalStatus,note,qty:S.currentQty,expectedQty:exp,custom:false,lowQty,test});
   saveResults(S.prop,S.results);
   if(item.name==='Enxoval') setTimeout(()=>document.getElementById('central-aviso').style.display='flex',2200);
   document.querySelectorAll('.btn-status').forEach(b=>b.classList.remove('active'));
@@ -2513,6 +2572,7 @@ async function buildReportHTML(){
           <span style="font-size:12px;font-weight:700;color:#080E32;flex:1;min-width:0">${it.item}${it.custom?' <span style="font-size:10px;font-weight:400;color:#aaa">+</span>':''}</span>
           <span style="display:inline-flex;align-items:center;gap:3px;background:${sBg[it.status]};border:1px solid ${sColor[it.status]};border-radius:99px;padding:2px 7px;font-size:10px;font-weight:700;color:${sColor[it.status]};white-space:nowrap">${sIcon[it.status]} ${sLabel[it.status]}</span>
         </div>
+        ${it.test?(()=>{const bad=it.test==='estragado'||it.test==='com_vazamento';const ic=it.test==='com_vazamento'||it.test==='sem_vazamento'?'💧':'⚡';return `<div style="margin-top:4px"><span style="display:inline-flex;align-items:center;gap:3px;background:${bad?'#FEF2F2':'#ECFDF5'};border:1px solid ${bad?'#E7000B':'#059669'};border-radius:99px;padding:1px 7px;font-size:10px;font-weight:700;color:${bad?'#E7000B':'#059669'}">${ic} ${TEST_LABEL[it.test]}</span></div>`;})():''}
         ${(()=>{
           if(it.item==='Pin de localização'&&it.note&&it.note.includes('google.com/maps')){
             const _p=it.note.split('|').map(s=>s.trim());
