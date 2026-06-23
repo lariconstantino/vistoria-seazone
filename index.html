@@ -111,10 +111,11 @@ body{
 .ia-wave span:nth-child(4){height:6px;animation:wav .8s ease-in-out infinite .45s}
 @keyframes wav{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1.2)}}
 /* status buttons */
-.status-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.btn-status{border:1.5px solid var(--border);border-radius:var(--rfull);padding:13px 4px;cursor:pointer;text-align:center;background:transparent;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:4px;font-family:var(--font);font-size:12px;font-weight:600;letter-spacing:.02em;transition:all .2s;min-height:56px;justify-content:center}
+.status-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.btn-status{border:1.5px solid var(--border);border-radius:14px;padding:13px 3px;cursor:pointer;text-align:center;background:transparent;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:4px;font-family:var(--font);font-size:11px;font-weight:600;letter-spacing:.01em;transition:all .2s;min-height:56px;justify-content:center}
 .btn-status span{font-size:18px}
 .btn-status.ok:hover,.btn-status.ok.active{background:var(--green-lt);border-color:var(--green);color:var(--green)}
+.btn-status.regular:hover,.btn-status.regular.active{background:#FEFCE8;border-color:#EAB308;color:#A16207}
 .btn-status.ressalva:hover,.btn-status.ressalva.active{background:var(--orange-lt);border-color:var(--orange);color:var(--orange)}
 .btn-status.ausente:hover,.btn-status.ausente.active{background:var(--red-lt);border-color:var(--red);color:var(--red)}
 /* foto */
@@ -138,7 +139,9 @@ body{
 .grp-qty::-webkit-outer-spin-button,.grp-qty::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 .grp-status{display:flex;gap:6px}
 .grp-st{flex:1;padding:8px 4px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-family:var(--font);font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.grp-st{font-size:12px;padding:8px 2px}
 .grp-st.ok.on{background:#059669;border-color:#059669;color:#fff}
+.grp-st.regular.on{background:#EAB308;border-color:#EAB308;color:#fff}
 .grp-st.ressalva.on{background:#FF8904;border-color:#FF8904;color:#fff}
 .grp-st.ausente.on{background:#E7000B;border-color:#E7000B;color:#fff}
 #grp-next:disabled{opacity:.45}
@@ -156,7 +159,7 @@ body{
 .timeline::-webkit-scrollbar{width:2px}
 .timeline::-webkit-scrollbar-thumb{background:var(--muted-bg);border-radius:99px}
 .tl-item{display:flex;align-items:flex-start;gap:7px;padding:6px 9px;background:var(--input);border-radius:8px;animation:slideIn .2s ease}
-.tl-item.ressalva{background:var(--orange-lt)}.tl-item.ausente{background:var(--red-lt)}
+.tl-item.regular{background:#FEFCE8}.tl-item.ressalva{background:var(--orange-lt)}.tl-item.ausente{background:var(--red-lt)}
 .tl-icon{flex-shrink:0;font-size:11px;margin-top:2px}
 .tl-text{font-size:12px;color:var(--muted);display:flex;gap:5px;flex-wrap:wrap;align-items:center}
 .tl-qty{font-size:11px;font-weight:700;color:var(--blue)}
@@ -179,10 +182,10 @@ body{
 /* summary */
 .sum-hero{text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;padding:6px 0}
 .sum-hero h3{font-size:22px;font-weight:700;letter-spacing:-.3px}
-.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 6px;text-align:center;box-shadow:var(--shadow)}
-.stat-val{font-size:24px;font-weight:700;color:var(--blue)}
-.stat-val.warn{color:var(--orange)}.stat-val.danger{color:var(--red)}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 3px;text-align:center;box-shadow:var(--shadow)}
+.stat-val{font-size:21px;font-weight:700;color:var(--blue)}
+.stat-val.warn{color:var(--orange)}.stat-val.danger{color:var(--red)}.stat-val.reg{color:#CA8A04}
 .stat-lbl{font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
 .send-card{background:rgba(0,85,255,.03);border:1.5px solid var(--blue);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow)}
 .send-title{font-size:13px;font-weight:700;color:var(--blue)}
@@ -193,6 +196,7 @@ body{
 .sum-section{display:flex;flex-direction:column;gap:6px}
 .sum-sec-title{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0 2px;margin-top:4px}
 .sum-item{display:flex;align-items:flex-start;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px;box-shadow:var(--shadow)}
+.sum-item.regular{background:#FEFCE8;border-color:rgba(234,179,8,.3)}
 .sum-item.ressalva{background:var(--orange-lt);border-color:rgba(255,137,4,.3)}
 .sum-item.ausente{background:var(--red-lt);border-color:rgba(231,0,11,.2)}
 .sum-item-body{display:flex;flex-direction:column;gap:2px;flex:1}
@@ -449,7 +453,7 @@ body{
     </div>
     <div class="intro-step" id="step-2">
       <div class="step-ico">👆</div>
-      <div class="step-body"><h4>Marque a condição</h4><p>Toque em <b>Bom</b>, <b>Ruim</b> ou <b>Ausente</b>. Isso já avança pro próximo item.</p></div>
+      <div class="step-body"><h4>Marque a condição</h4><p>Toque em <b>Bom</b>, <b>Regular</b>, <b>Ruim</b> ou <b>Ausente</b>.</p></div>
     </div>
     <div class="intro-step" id="step-3">
       <div class="step-ico">📝</div>
@@ -508,6 +512,7 @@ body{
     <div class="label" style="margin-top:2px">Como está o item?</div>
     <div class="status-btns">
       <button class="btn-status ok"       onclick="mark('ok')">      <span>✓</span>Bom</button>
+      <button class="btn-status regular"  onclick="mark('regular')"> <span>~</span>Regular</button>
       <button class="btn-status ressalva" onclick="mark('ressalva')"><span>⚠</span>Ruim</button>
       <button class="btn-status ausente"  onclick="mark('ausente')"> <span>✗</span>Ausente</button>
     </div>
@@ -525,6 +530,7 @@ body{
     <button class="btn-foto" id="btn-foto-main" onclick="document.getElementById('foto-input').click()">📷 Tirar foto</button>
     <div class="foto-obrig" id="foto-obrig">⚠ Foto obrigatória — fotografe o item para continuar</div>
     <div class="foto-grid" id="foto-grid"></div>
+    <button class="btn btn-primary" id="ip-confirm-btn" onclick="confirmItem()" style="display:none;margin-top:4px">✓ Confirmar e avançar</button>
 
     <!-- PIN DE LOCALIZAÇÃO -->
     <div id="loc-wrap" style="display:none;flex-direction:column;gap:10px">
@@ -582,9 +588,10 @@ body{
     <span class="small" style="color:var(--muted)" id="sum-sub"></span>
   </div>
   <div class="stats">
-    <div class="stat"><div class="stat-val" id="sum-ok">0</div><div class="stat-lbl">OK</div></div>
-    <div class="stat"><div class="stat-val warn" id="sum-res">0</div><div class="stat-lbl">Ressalvas</div></div>
-    <div class="stat"><div class="stat-val danger" id="sum-aus">0</div><div class="stat-lbl">Ausentes</div></div>
+    <div class="stat"><div class="stat-val" id="sum-ok" style="color:var(--green)">0</div><div class="stat-lbl">Bom</div></div>
+    <div class="stat"><div class="stat-val reg" id="sum-reg">0</div><div class="stat-lbl">Regular</div></div>
+    <div class="stat"><div class="stat-val warn" id="sum-res">0</div><div class="stat-lbl">Ruim</div></div>
+    <div class="stat"><div class="stat-val danger" id="sum-aus">0</div><div class="stat-lbl">Ausente</div></div>
     <div class="stat"><div class="stat-val warn" id="sum-low">0</div><div class="stat-lbl">Qtd baixa</div></div>
     <div class="stat"><div class="stat-val" id="sum-fotos" style="color:var(--blue)">0</div><div class="stat-lbl">Fotos</div></div>
   </div>
@@ -630,6 +637,7 @@ body{
     <input id="modal-input" type="text" placeholder="Ex: Espelho decorativo, Quadro, Tapete"/>
     <div class="status-btns" style="margin-top:8px">
       <button class="btn-status ok"       id="mc-st-ok"  onclick="setCustomStatus('ok')"><span>✓</span>Bom</button>
+      <button class="btn-status regular"  id="mc-st-reg" onclick="setCustomStatus('regular')"><span>~</span>Regular</button>
       <button class="btn-status ressalva" id="mc-st-res" onclick="setCustomStatus('ressalva')"><span>⚠</span>Ruim</button>
       <button class="btn-status ausente"  id="mc-st-aus" onclick="setCustomStatus('ausente')"><span>✗</span>Ausente</button>
     </div>
@@ -744,6 +752,10 @@ const COZ=[mk('Garfos'),mk('Facas'),mk('Colheres de sopa'),mk('Colheres de chá'
 const BATH=[mk('Chuveiro',1),mk('Ralo'),mk('Janelas',1),mk('Cortina',1),mk('Box'),mk('Vaso sanitário',1),mk('Bidê',1),mk('Ducha higiênica',1),mk('Banheira (privativa)',1),mk('Lixeira'),mk('Escova sanitária'),mk('Exaustor'),mk('Torneira',1),mk('Espelho'),mk('Secador de cabelo'),mk('Itens de higiene pessoal',1),mk('Lâmpadas'),mk('Interruptores/tomadas'),mk('Piso'),mk('Parede'),mk('Teto'),mk('Porta',1)];
 const Q1=[mk('Cama',1),mk('Colchão',1),mk('Travesseiros'),mk('Arara para roupas'),mk('Armário'),mk('Cabides'),mk('Televisão',1),mk('Controle da televisão'),mk('Ventilador',1),mk('Ar condicionado',1),mk('Controle do ar condicionado'),mk('Berço'),mk('Janelas',1),mk('Tela de proteção'),mk('Cortina',1),mk('Lâmpadas'),mk('Interruptores/tomadas'),mk('Piso'),mk('Parede'),mk('Teto'),mk('Porta',1)];
 const GERAL=[mk('Interfone'),mk('Modem de internet'),mk('Wi-fi'),mk('Capacidade de hóspedes'),mk('Itens pessoais do proprietário'),mk('Enxoval'),mk('Tour pelo imóvel'),mk('Quadro de luz'),mk('Chaves'),mk('Varanda/Sacada'),mk('Kit Churrasco',1),mk('Voltagem',1),mk('Cofre'),mk('Frigobar/Cervejeira/Adega'),mk('Pin de localização')];
+// Suíte = quarto + banheiro privativo (prefixos separam acabamento/elétrica de cada lado)
+const SUITE=[mk('Cama',2),mk('Colchão',1),mk('Travesseiros'),mk('Arara para roupas'),mk('Armário'),mk('Cabides'),mk('Televisão',1),mk('Controle da televisão'),mk('Ventilador',1),mk('Ar condicionado',1),mk('Controle do ar condicionado'),mk('Berço'),mk('Quarto - Janelas',1),mk('Quarto - Cortina',1),mk('Quarto - Lâmpadas'),mk('Quarto - Interruptores/tomadas'),mk('Quarto - Piso'),mk('Quarto - Parede'),mk('Quarto - Teto'),mk('Quarto - Porta',1),mk('Chuveiro',3),mk('Ralo'),mk('Banheiro - Janelas',1),mk('Box'),mk('Vaso sanitário',1),mk('Bidê',1),mk('Ducha higiênica',1),mk('Lixeira'),mk('Escova sanitária'),mk('Exaustor'),mk('Torneira',2),mk('Espelho'),mk('Secador de cabelo'),mk('Itens de higiene pessoal',1),mk('Banheiro - Lâmpadas'),mk('Banheiro - Interruptores/tomadas'),mk('Banheiro - Piso'),mk('Banheiro - Parede'),mk('Banheiro - Teto'),mk('Banheiro - Porta',1)];
+// Studio = sala + quarto integrados, com banheiro (tudo num cômodo só)
+const STUDIO=[mk('Cama',2),mk('Colchão',1),mk('Travesseiros'),mk('Armário'),mk('Cabides'),mk('Sofá',1),mk('Mesa e cadeiras'),mk('Itens decorativos'),mk('Televisão',1),mk('Controle da televisão'),mk('Ar condicionado',1),mk('Controle do ar condicionado'),mk('Ventilador',1),mk('Janelas',1),mk('Cortina',1),mk('Lâmpadas'),mk('Interruptores/tomadas'),mk('Piso'),mk('Parede'),mk('Teto'),mk('Porta',1),mk('Box'),mk('Chuveiro',3),mk('Vaso sanitário',1),mk('Ducha higiênica',1),mk('Torneira',1),mk('Espelho'),mk('Lixeira'),mk('Escova sanitária'),mk('Exaustor'),mk('Ralo')];
 const TEMPLATES=[
   // ── Template de testes rápidos ──────────────────────────────
   {id:'teste-quarto-001',name:'Teste',environments:[
@@ -1052,7 +1064,7 @@ function itemPrompt(itemName){
   const specAsk=(typeof ITEM_SPECS!=='undefined'&&ITEM_SPECS[itemName])?' '+ITEM_SPECS[itemName].prompt:'';
   const _tt=itemTestType(itemName);
   const testPart=_tt?testAsk(_tt):'';
-  const cond=' Tira a foto e marca: tá bom, ruim ou ausente?';
+  const cond=' Tira a foto e marca: tá bom, regular, ruim ou ausente?';
   if(instruction) return `${itemName}.${mandAviso} ${instruction}${testPart}${specAsk}${cond}`;
   return itemName+(mandAviso?'.'+mandAviso:'')+testPart+specAsk+cond;
 }
@@ -1066,6 +1078,7 @@ function itemCategoryLabel(name){
 }
 
 function afterMark(status, nextItem){
+  if(status==='regular') return `Marcado como regular.${nextItem?' Próximo: '+nextItem:''}`;
   if(status==='ressalva') return `Ressalva anotada.${nextItem?' Próximo: '+nextItem:''}`;
   if(status==='ausente') return `Marcado como ausente.${nextItem?' Próximo: '+nextItem:''}`;
   return nextItem?`Ótimo. Próximo: ${nextItem}`:'';
@@ -1310,7 +1323,9 @@ const ENV_DETECT=[
 
 function getEnvItems(n){
   const l=n.toLowerCase();
-  if(l.startsWith('quarto')||l.startsWith('suíte')||l.startsWith('suite')) return Q1;
+  if(l.startsWith('studio')||l.startsWith('stúdio')||l.startsWith('estúdio')||l.startsWith('estudio')) return STUDIO.map(it=>({...it}));
+  if(l.startsWith('suíte')||l.startsWith('suite')) return SUITE.map(it=>({...it}));
+  if(l.startsWith('quarto')) return Q1;
   if(l.startsWith('sala')) return [mk('Sofá',1),mk('Televisão',1),mk('Controle da televisão'),mk('Ventilador',1),mk('Ar condicionado',1),mk('Controle do ar condicionado'),mk('Lareira interna'),mk('Janelas',1),mk('Cortina',1),mk('Lâmpadas'),mk('Interruptores/tomadas'),mk('Piso'),mk('Parede'),mk('Teto'),mk('Porta',1),mk('Mesa e cadeiras'),mk('Itens decorativos')];
   if(l.includes('cozinha')) return COZ;
   if(l.includes('área de serviço')||l.includes('lavanderia')) return [mk('Torneira área de serviço',2),mk('Máquina de lavar',1),mk('Secadora'),mk('Tábua de roupas'),mk('Varal'),mk('Vassoura'),mk('Rodo'),mk('Pá de lixo'),mk('Balde'),mk('Ferro de passar'),mk('Lâmpadas'),mk('Interruptores/tomadas'),mk('Piso'),mk('Parede'),mk('Teto'),mk('Porta',1),mk('Janela',1)];
@@ -1381,6 +1396,7 @@ function togglePdListen(){if(_pdListening)stopPdListen();else startPdListen();}
 
 // Ambientes que um imóvel pode ter — base para a seleção visual
 const ENV_CATALOG=[
+  {key:'Studio',          emoji:'🏢', label:'Studio'},
   {key:'Quarto',          emoji:'🛏️', label:'Quarto'},
   {key:'Suíte',           emoji:'🛌', label:'Suíte'},
   {key:'Sala',            emoji:'🛋️', label:'Sala'},
@@ -1694,6 +1710,7 @@ function renderItem(){
   document.getElementById('note-row').style.display='flex';
   document.getElementById('note-input').value='';
   document.getElementById('foto-grid').innerHTML='';
+  const _cb=document.getElementById('ip-confirm-btn'); if(_cb) _cb.style.display='none';
   document.querySelectorAll('.btn-status').forEach(b=>b.classList.remove('active'));
   S.pendingAdvance=false;
   S.currentNote='';
@@ -1739,10 +1756,12 @@ function setTest(v){
 }
 
 const AFFIRM_OK=['Anotado!','Boa!','Show!','Isso!','Beleza!','Mandou bem!'];
+const AFFIRM_REG=['Anotei como regular.','Ok, marquei regular.','Beleza, regular então.'];
 const AFFIRM_RES=['Anotei a ressalva, tá?','Beleza, registrei aqui.','Ok, vou anotar isso.'];
 const AFFIRM_AUS=['Ok, marquei que não tá lá.','Anotei como ausente!','Tá bom, pulando esse.'];
 let _affirmIdx=0;
 function quickAffirm(status){
+  if(status==='regular'){const a=AFFIRM_REG[_affirmIdx%AFFIRM_REG.length];_affirmIdx++;return a;}
   if(status==='ressalva'){const a=AFFIRM_RES[_affirmIdx%AFFIRM_RES.length];_affirmIdx++;return a;}
   if(status==='ausente'){const a=AFFIRM_AUS[_affirmIdx%AFFIRM_AUS.length];_affirmIdx++;return a;}
   const a=AFFIRM_OK[_affirmIdx%AFFIRM_OK.length];_affirmIdx++;return a;
@@ -1751,34 +1770,38 @@ function quickAffirm(status){
 // ── TRAVAS DE ESPECIFICAÇÃO (cama / sofá) ─────────────────────
 const ITEM_SPECS={
   'Cama':{
-    prompt:'Essa cama é casal, queen ou king? Se tiver dúvida, toca em "tenho dúvida" que eu te ensino.',
-    intro:'Antes de marcar: essa cama é casal, queen ou king?',
-    questions:[{key:'Tamanho',options:['Casal','Queen','King']}],
-    help:'Pra medir sem fita é fácil, viu? Põe os travesseiros lado a lado em cima da cama. Se eles baterem certinho na largura, é casal. Se sobrar uns cinco a dez dedos, é queen. E se der pra encaixar quase três travesseiros, aí é king. Deu pra entender?'
+    prompt:'Essa cama é solteiro, casal, queen, king ou auxiliar? Se tiver dúvida, toca em "tenho dúvida" que eu te ensino.',
+    intro:'Antes de marcar: qual o tipo dessa cama?',
+    questions:[{key:'Tamanho',options:['Solteiro','Casal','Queen','King','Auxiliar']}],
+    help:'Pra medir sem fita é fácil, viu? Põe os travesseiros lado a lado em cima da cama. Um travesseiro só na largura é solteiro. Dois batendo certinho é casal. Se sobrar uns cinco a dez dedos, é queen. E se der pra encaixar quase três travesseiros, aí é king. Cama auxiliar é a de apoio, tipo a que sai de baixo ou dobrável. Deu pra entender?'
   },
   'Sofá':{
-    prompt:'Esse sofá é sofá-cama? E ele é de casal ou de solteiro?',
-    intro:'Antes de marcar: esse sofá é sofá-cama? E é casal ou solteiro?',
+    prompt:'Esse sofá é sofá-cama? Se for, ele é de casal ou de solteiro?',
+    intro:'Antes de marcar: esse sofá é sofá-cama?',
     questions:[
       {key:'Sofá-cama',options:['Sim','Não']},
-      {key:'Tamanho',options:['Casal','Solteiro']}
+      {key:'Tamanho',options:['Casal','Solteiro'],when:a=>a['Sofá-cama']==='Sim'}
     ]
   }
 };
+
+function specQuestions(cfg){ return cfg.questions.filter(q=>!q.when||q.when(S.currentSpec||{})); }
 
 function renderItemSpecs(itemName){
   const wrap=document.getElementById('spec-wrap');
   const cfg=ITEM_SPECS[itemName];
   if(!cfg){wrap.style.display='none';wrap.innerHTML='';return;}
+  S.currentSpecItem=itemName;
   wrap.classList.remove('spec-required');
   wrap.style.display='flex';
+  const sel=S.currentSpec||{};
   wrap.innerHTML=
     `<div class="spec-intro">${cfg.intro}</div>`+
-    cfg.questions.map(q=>
+    specQuestions(cfg).map(q=>
       `<div class="spec-q" data-q="${q.key}">
         <div class="spec-q-lbl">${q.key}</div>
         <div class="spec-chips">
-          ${q.options.map(o=>`<button type="button" class="spec-chip" onclick="selectSpec('${q.key}','${o}')">${o}</button>`).join('')}
+          ${q.options.map(o=>`<button type="button" class="spec-chip${sel[q.key]===o?' on':''}" onclick="selectSpec('${q.key}','${o}')">${o}</button>`).join('')}
         </div>
       </div>`).join('')+
     (cfg.help?`<button type="button" class="spec-help" onclick="specHelp('${itemName}')">🤔 Tenho dúvida — me ensina</button>`:'');
@@ -1787,9 +1810,8 @@ function renderItemSpecs(itemName){
 function selectSpec(qkey,value){
   if(!S.currentSpec) S.currentSpec={};
   S.currentSpec[qkey]=value;
-  document.querySelectorAll(`.spec-q[data-q="${qkey}"] .spec-chip`).forEach(b=>{
-    b.classList.toggle('on', b.textContent.trim()===value);
-  });
+  // re-renderiza pra atualizar perguntas condicionais (ex: tamanho do sofá só se for sofá-cama)
+  renderItemSpecs(S.currentSpecItem);
   document.getElementById('spec-wrap').classList.remove('spec-required');
 }
 
@@ -1801,13 +1823,13 @@ function specHelp(itemName){
 function specComplete(itemName){
   const cfg=ITEM_SPECS[itemName];
   if(!cfg) return true;
-  return cfg.questions.every(q=>S.currentSpec&&S.currentSpec[q.key]);
+  return specQuestions(cfg).every(q=>S.currentSpec&&S.currentSpec[q.key]);
 }
 
 function specToNote(itemName){
   const s=S.currentSpec||{};
   if(itemName==='Cama') return `Cama ${s['Tamanho']}`;
-  if(itemName==='Sofá') return `${s['Sofá-cama']==='Sim'?'Sofá-cama':'Sofá comum'} · ${s['Tamanho']}`;
+  if(itemName==='Sofá') return s['Sofá-cama']==='Sim'?`Sofá-cama · ${s['Tamanho']}`:'Sofá comum';
   return Object.values(s).join(' · ');
 }
 
@@ -1818,7 +1840,7 @@ function renderUnit(){
   if(u.type==='group'){ renderGroup(u); }
   else { document.getElementById('fab').classList.add('visible'); show('s-inspect'); renderItem(); }
 }
-function groupIntro(group){ return `Agora ${group.title}. Dá pra registrar numa foto só — e marca cada um: bom, ruim ou ausente.`; }
+function groupIntro(group){ return `Agora ${group.title}. Dá pra registrar numa foto só — e marca cada um: bom, regular, ruim ou ausente.`; }
 function speakUnit(prefix){
   const u=curUnit(); if(!u) return;
   const txt = u.type==='group' ? groupIntro(u.group) : itemPrompt(u.items[0].name);
@@ -1860,6 +1882,7 @@ function buildGroupRows(){
       </div>
       <div class="grp-status">
         <button type="button" class="grp-st ok${st==='ok'?' on':''}" onclick="setGroupStatus(${i},'ok')">Bom</button>
+        <button type="button" class="grp-st regular${st==='regular'?' on':''}" onclick="setGroupStatus(${i},'regular')">Regular</button>
         <button type="button" class="grp-st ressalva${st==='ressalva'?' on':''}" onclick="setGroupStatus(${i},'ressalva')">Ruim</button>
         <button type="button" class="grp-st ausente${st==='ausente'?' on':''}" onclick="setGroupStatus(${i},'ausente')">Ausente</button>
       </div>
@@ -1921,6 +1944,8 @@ function confirmGroup(){
 
 function mark(status){
   if(S.pendingAdvance) return;
+  // Trava anti-toque-duplo: ignora cliques por ~600ms após um avanço (evita pular 2 itens)
+  if(performance.now()<(S._advLock||0)) return;
 
   // Trava: cama/sofá precisam de especificação antes de OK/Ressalva (ausente é exceção)
   if(status!=='ausente'&&!specComplete(curItem().name)){
@@ -1980,11 +2005,19 @@ function mark(status){
 
   const affirm=quickAffirm(finalStatus);
   stopListening();
+  S._advLock=performance.now()+600;   // arma a trava anti-toque-duplo
   setTimeout(()=>{
     S.itemIdx++;   // avança de UNIDADE
     if(!curUnit()){ ia(affirm,()=>showEnvDone()); }
     else { renderUnit(); speakUnit(affirm); }
   },300);
+}
+
+// Confirma o item quando a franquia respondeu primeiro e tirou foto(s) —
+// permite tirar VÁRIAS fotos antes de avançar (não confirma sozinho na 1ª foto).
+function confirmItem(){
+  if(!S.pendingStatus) return;
+  mark(S.pendingStatus);   // foto já presente → mark finaliza e avança
 }
 
 function showEnvDone(){
@@ -2171,7 +2204,7 @@ function nextEnv(){
 
 function addTimeline(name,status,note,qty,exp){
   const tl=document.getElementById('timeline');
-  const icon=status==='ok'?'✓':status==='ressalva'?'⚠':'✗';
+  const icon=status==='ok'?'✓':status==='regular'?'~':status==='ressalva'?'⚠':'✗';
   const st=isStruct(name);
   const lowQty=!st&&qty<exp;
   const div=document.createElement('div');
@@ -2352,11 +2385,17 @@ async function onFotoSelected(e){
     }catch(err){}
   })();
 
-  // Se a condição já foi escolhida (Bom/Ruim) e faltava só a foto → confirma sozinho
-  if(S.pendingStatus){ const ps=S.pendingStatus; S.pendingStatus=null; mark(ps); return; }
+  // Respondeu primeiro e agora tem foto: NÃO avança sozinho — deixa tirar VÁRIAS fotos
+  // e mostra o botão de confirmar (a franquia decide quando seguir).
+  if(S.pendingStatus){
+    const cb=document.getElementById('ip-confirm-btn'); if(cb) cb.style.display='block';
+    const np=document.querySelectorAll('#foto-grid .foto-thumb').length;
+    ia(np>1?'Mais uma foto registrada! Tira quantas precisar — quando terminar, é só confirmar.':'Foto registrada! Pode tirar mais fotos desse item; quando terminar, é só confirmar.');
+    return;
+  }
 
   const n=document.querySelectorAll('#foto-grid .foto-thumb').length;
-  ia(n>1?'Mais uma foto. Quando terminar, marca: bom, ruim ou ausente.':'Foto registrada. Se tiver problema, pode tirar mais. Agora marca: bom, ruim ou ausente.');
+  ia(n>1?'Mais uma foto. Quando terminar, marca: bom, regular, ruim ou ausente.':'Foto registrada. Se quiser, pode tirar mais. Agora marca: bom, regular, ruim ou ausente.');
 }
 
 function addThumb(id,src){
@@ -2382,7 +2421,7 @@ function closeModal(e){if(!e||e.target===document.getElementById('modal-bg'))doc
 function setCustomStatus(status){
   _customStatus=status;
   document.querySelectorAll('#modal-bg .btn-status').forEach(b=>b.classList.remove('active'));
-  const id=status==='ok'?'mc-st-ok':status==='ressalva'?'mc-st-res':'mc-st-aus';
+  const id=status==='ok'?'mc-st-ok':status==='regular'?'mc-st-reg':status==='ressalva'?'mc-st-res':'mc-st-aus';
   document.getElementById(id).classList.add('active');
 }
 function onCustomPhoto(e){
@@ -2422,21 +2461,24 @@ async function showSummary(){
 
   const fotos=await getAllFotos();
   const ok=S.results.filter(r=>r.status==='ok').length;
+  const reg=S.results.filter(r=>r.status==='regular');
   const res=S.results.filter(r=>r.status==='ressalva');
   const aus=S.results.filter(r=>r.status==='ausente');
   const low=S.results.filter(r=>r.lowQty);
 
   document.getElementById('sum-ok').textContent=ok;
+  document.getElementById('sum-reg').textContent=reg.length;
   document.getElementById('sum-res').textContent=res.length;
   document.getElementById('sum-aus').textContent=aus.length;
   document.getElementById('sum-low').textContent=low.length;
   document.getElementById('sum-fotos').textContent=fotos.length;
-  document.getElementById('sum-sub').textContent=res.length+aus.length>0?`${res.length+aus.length} iten(s) precisam de atenção`:'Tudo verificado e em ordem.';
-  document.getElementById('sum-icon').textContent=res.length+aus.length>0?'⚠️':'✅';
+  const atencao=res.length+aus.length;
+  document.getElementById('sum-sub').textContent=atencao>0?`${atencao} iten(s) precisam de atenção`:(reg.length>0?`${reg.length} iten(s) em estado regular`:'Tudo verificado e em ordem.');
+  document.getElementById('sum-icon').textContent=atencao>0?'⚠️':'✅';
 
   const list=document.getElementById('sum-list');
   list.innerHTML='';
-  [{key:'ressalva',label:'Ressalvas',icon:'⚠'},{key:'ausente',label:'Ausentes',icon:'✗'}].forEach(({key,label,icon})=>{
+  [{key:'regular',label:'Regular',icon:'~'},{key:'ressalva',label:'Ruim',icon:'⚠'},{key:'ausente',label:'Ausentes',icon:'✗'}].forEach(({key,label,icon})=>{
     const items=S.results.filter(r=>r.status===key);if(!items.length)return;
     const sec=document.createElement('div');sec.className='sum-section';
     sec.innerHTML=`<div class="sum-sec-title">${label} (${items.length})</div>`;
@@ -2517,11 +2559,13 @@ function buildMaintenanceGroups(){
 function buildReport(){
   const date=new Date().toLocaleDateString('pt-BR');
   const ok=S.results.filter(r=>r.status==='ok').length;
+  const reg=S.results.filter(r=>r.status==='regular');
   const res=S.results.filter(r=>r.status==='ressalva');
   const aus=S.results.filter(r=>r.status==='ausente');
   const low=S.results.filter(r=>r.lowQty);
-  let txt=`🏠 *VISTORIA* — ${S.prop} (${S.tpl.name})\n📅 ${date}${S.guests?` · 👥 ${S.guests} hóspedes`:''}${S.name?` · 👤 ${S.name}`:''}\n\n✓ ${ok} OK  ⚠ ${res.length} ressalvas  ✗ ${aus.length} ausentes\n`;
-  if(res.length) txt+=`\n⚠ *Ressalvas:*\n`+res.map(r=>`• ${r.env} › ${r.item}${!isStruct(r.item)?` (${r.qty}un)`:''}`+(r.note?` — ${r.note}`:'')).join('\n');
+  let txt=`🏠 *VISTORIA* — ${S.prop} (${S.tpl.name})\n📅 ${date}${S.guests?` · 👥 ${S.guests} hóspedes`:''}${S.name?` · 👤 ${S.name}`:''}\n\n✓ ${ok} bom  ~ ${reg.length} regular  ⚠ ${res.length} ruim  ✗ ${aus.length} ausente\n`;
+  if(reg.length) txt+=`\n~ *Regular:*\n`+reg.map(r=>`• ${r.env} › ${r.item}${!isStruct(r.item)?` (${r.qty}un)`:''}`+(r.note?` — ${r.note}`:'')).join('\n');
+  if(res.length) txt+=`\n\n⚠ *Ruim:*\n`+res.map(r=>`• ${r.env} › ${r.item}${!isStruct(r.item)?` (${r.qty}un)`:''}`+(r.note?` — ${r.note}`:'')).join('\n');
   if(aus.length) txt+=`\n\n✗ *Ausentes:*\n`+aus.map(r=>`• ${r.env} › ${r.item}`).join('\n');
   if(low.filter(r=>r.status==='ok').length) txt+=`\n\n📦 *Qtd baixa:*\n`+low.filter(r=>r.status==='ok').map(r=>`• ${r.env} › ${r.item}: ${r.qty}/${r.expectedQty}`).join('\n');
 
@@ -2561,13 +2605,14 @@ async function buildReportHTML(){
     :S.results;
 
   const ok=allResults.filter(r=>r.status==='ok').length;
+  const regCount=allResults.filter(r=>r.status==='regular').length;
   const resCount=allResults.filter(r=>r.status==='ressalva').length;
   const ausCount=allResults.filter(r=>r.status==='ausente').length;
 
-  const sColor={ok:'#059669',ressalva:'#FF8904',ausente:'#E7000B'};
-  const sBg={ok:'#ECFDF5',ressalva:'#FFF7ED',ausente:'#FEF2F2'};
-  const sIcon={ok:'✓',ressalva:'⚠',ausente:'✗'};
-  const sLabel={ok:'Bom',ressalva:'Ruim',ausente:'Ausente'};
+  const sColor={ok:'#059669',regular:'#CA8A04',ressalva:'#FF8904',ausente:'#E7000B'};
+  const sBg={ok:'#ECFDF5',regular:'#FEFCE8',ressalva:'#FFF7ED',ausente:'#FEF2F2'};
+  const sIcon={ok:'✓',regular:'~',ressalva:'⚠',ausente:'✗'};
+  const sLabel={ok:'Bom',regular:'Regular',ressalva:'Ruim',ausente:'Ausente'};
 
   // Itens mínimos faltantes
   const missingMand=getMissingMandatory(allResults);
@@ -2690,9 +2735,10 @@ details[open]>summary{border-bottom:1px solid #E6E7EA}
   <div style="text-align:right;font-size:12px;color:#6B6E84;flex-shrink:0"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.05em">Gerado em</div><div style="font-weight:600;color:#080E32;margin-top:2px">${now.toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})}</div></div>
 </div>
 
-<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:24px">
-  <div style="background:#ECFDF5;border:1px solid #059669;border-radius:10px;padding:14px;text-align:center"><div style="font-size:28px;font-weight:700;color:#059669">${ok}</div><div style="font-size:11px;color:#059669;text-transform:uppercase;letter-spacing:.05em;font-weight:600">OK</div></div>
-  <div style="background:#FFF7ED;border:1px solid #FF8904;border-radius:10px;padding:14px;text-align:center"><div style="font-size:28px;font-weight:700;color:#FF8904">${resCount}</div><div style="font-size:11px;color:#FF8904;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Ressalvas</div></div>
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:24px">
+  <div style="background:#ECFDF5;border:1px solid #059669;border-radius:10px;padding:14px;text-align:center"><div style="font-size:28px;font-weight:700;color:#059669">${ok}</div><div style="font-size:11px;color:#059669;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Bom</div></div>
+  <div style="background:#FEFCE8;border:1px solid #CA8A04;border-radius:10px;padding:14px;text-align:center"><div style="font-size:28px;font-weight:700;color:#CA8A04">${regCount}</div><div style="font-size:11px;color:#CA8A04;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Regular</div></div>
+  <div style="background:#FFF7ED;border:1px solid #FF8904;border-radius:10px;padding:14px;text-align:center"><div style="font-size:28px;font-weight:700;color:#FF8904">${resCount}</div><div style="font-size:11px;color:#FF8904;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Ruim</div></div>
   <div style="background:#FEF2F2;border:1px solid #E7000B;border-radius:10px;padding:14px;text-align:center"><div style="font-size:28px;font-weight:700;color:#E7000B">${ausCount}</div><div style="font-size:11px;color:#E7000B;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Ausentes</div></div>
   <div style="background:#F0F2FA;border:1px solid #0055FF;border-radius:10px;padding:14px;text-align:center"><div style="font-size:28px;font-weight:700;color:#0055FF">${fotos.length}</div><div style="font-size:11px;color:#0055FF;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Fotos</div></div>
 </div>
