@@ -1828,14 +1828,17 @@ function setGroupQty(i,v){ let n=parseInt(v,10); if(isNaN(n)||n<0)n=0; S.groupQt
 function updateGroupNext(){ const all=S._groupUnit.items.every((it,i)=>S.groupStatus[i]); const btn=document.getElementById('grp-next'); if(btn) btn.disabled=!all; }
 async function onGroupPhoto(e){
   const file=e.target.files[0]; if(!file) return; e.target.value='';
-  const url=URL.createObjectURL(file);
-  const div=document.createElement('div'); div.className='foto-thumb'; div.innerHTML=`<img src="${url}"/><div class="foto-badge synced">✓</div>`;
-  document.getElementById('grp-foto-grid').appendChild(div);
-  const blob=await compressImage(file);
-  await savePhoto(blob,{env:curEnv().name,item:'grp:'+S._groupUnit.group.id});
+  // conta a foto IMEDIATAMENTE (evita corrida: salvar é assíncrono e demora em foto grande)
   _groupPhotoCount++;
   const fb=document.getElementById('grp-btn-foto'); fb.textContent='📷 Adicionar outra foto'; fb.classList.remove('required');
-  ia('Foto do grupo registrada. Marca cada item e toca em próximo.');
+  const url=URL.createObjectURL(file);
+  const div=document.createElement('div'); div.className='foto-thumb'; div.innerHTML=`<img src="${url}"/><div class="foto-badge">⏳</div>`;
+  document.getElementById('grp-foto-grid').appendChild(div);
+  try{
+    const blob=await compressImage(file);
+    await savePhoto(blob,{env:curEnv().name,item:'grp:'+(S._groupUnit&&S._groupUnit.group.id)});
+    const b=div.querySelector('.foto-badge'); if(b){b.className='foto-badge synced';b.textContent='✓';}
+  }catch(err){ const b=div.querySelector('.foto-badge'); if(b){b.textContent='!';} }
 }
 function confirmGroup(){
   const items=S._groupUnit.items;
