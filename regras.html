@@ -1,0 +1,452 @@
+<title>Regras da Vistoria Guiada — Seazone</title>
+<style>
+  :root{
+    --ground:#F4F7FB; --surface:#FFFFFF; --surface-2:#FAFCFE;
+    --ink:#15212E; --muted:#5A6B7B; --faint:#8696A6;
+    --hair:#E2E9F1; --hair-strong:#CFDAE6;
+    --accent:#0E5C97; --accent-soft:#E7F1FA; --accent-ink:#0B4775;
+    --bom:#1E8E5A; --bom-bg:#E7F4ED;
+    --reg:#B7791F; --reg-bg:#FBF1DD;
+    --ruim:#C24A12; --ruim-bg:#FBEADF;
+    --aus:#9A3B34; --aus-bg:#F7E7E5;
+    --r:14px; --r-sm:9px;
+    --shadow:0 1px 2px rgba(21,33,46,.04), 0 6px 24px -12px rgba(21,33,46,.18);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--ground); color:var(--ink);
+    font-family:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    font-size:16px; line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px; margin:0 auto; padding:0 24px; display:grid; grid-template-columns:236px 1fr; gap:48px;}
+  @media (max-width:900px){ .wrap{grid-template-columns:1fr; gap:0; padding:0 18px;} }
+
+  /* ---- nav ---- */
+  nav{position:sticky; top:0; align-self:start; height:100vh; overflow-y:auto; padding:34px 0 40px; }
+  @media (max-width:900px){ nav{position:static; height:auto; padding:18px 0 6px; border-bottom:1px solid var(--hair);} }
+  .brand{display:flex; align-items:center; gap:10px; margin-bottom:24px;}
+  .brand .dot{width:30px;height:30px;border-radius:8px;background:linear-gradient(150deg,#1474BD,#0B4775);
+    color:#fff;font-weight:700;font-size:12px;display:grid;place-items:center;letter-spacing:.5px;box-shadow:var(--shadow);}
+  .brand b{font-size:14px; letter-spacing:.2px;}
+  .brand span{display:block;font-size:11px;color:var(--faint);font-weight:500;letter-spacing:.3px;}
+  nav a{display:block; padding:6px 12px; margin:1px 0; border-radius:8px; color:var(--muted);
+    text-decoration:none; font-size:13.5px; line-height:1.35; border-left:2px solid transparent;}
+  nav a:hover{background:var(--accent-soft); color:var(--accent-ink);}
+  nav a .n{display:inline-block;width:20px;color:var(--faint);font-variant-numeric:tabular-nums;font-size:12px;}
+  @media (max-width:900px){ nav .navlist{display:grid;grid-template-columns:1fr 1fr;gap:0 8px;} }
+
+  /* ---- main ---- */
+  main{padding:40px 0 96px; min-width:0;}
+  header.hero{margin-bottom:40px;}
+  .eyebrow{font-size:12px; font-weight:600; letter-spacing:1.4px; text-transform:uppercase; color:var(--accent);}
+  h1{font-size:34px; line-height:1.12; margin:10px 0 14px; letter-spacing:-.02em; text-wrap:balance; font-weight:700;}
+  .lede{font-size:17px; color:var(--muted); max-width:62ch; margin:0;}
+  .meta-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:20px;}
+  .tag{font-size:12.5px; color:var(--accent-ink); background:var(--accent-soft); padding:5px 11px; border-radius:100px; font-weight:500;}
+
+  section{margin-top:40px; scroll-margin-top:24px;}
+  h2{font-size:13px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--accent);
+     display:flex; align-items:baseline; gap:10px; margin:0 0 16px; padding-bottom:11px; border-bottom:1px solid var(--hair);}
+  h2 .num{font-variant-numeric:tabular-nums; color:var(--hair-strong); font-size:13px;}
+  h3{font-size:16.5px; margin:26px 0 10px; letter-spacing:-.01em;}
+  p{margin:0 0 12px; color:#283642;}
+  .card{background:var(--surface); border:1px solid var(--hair); border-radius:var(--r); padding:22px 24px; box-shadow:var(--shadow);}
+  .card + .card{margin-top:14px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:680px){ .grid2{grid-template-columns:1fr;} }
+
+  /* status pills */
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:3px 10px;border-radius:100px;line-height:1.4;white-space:nowrap;}
+  .pill .ic{font-weight:700;}
+  .p-bom{color:var(--bom);background:var(--bom-bg);}
+  .p-reg{color:var(--reg);background:var(--reg-bg);}
+  .p-ruim{color:var(--ruim);background:var(--ruim-bg);}
+  .p-aus{color:var(--aus);background:var(--aus-bg);}
+
+  /* status grid */
+  .statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  @media (max-width:680px){ .statgrid{grid-template-columns:1fr 1fr;} }
+  .stat{border:1px solid var(--hair);border-radius:var(--r-sm);padding:14px 14px 16px;background:var(--surface);position:relative;overflow:hidden;}
+  .stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;}
+  .stat.s-bom::before{background:var(--bom);} .stat.s-reg::before{background:var(--reg);}
+  .stat.s-ruim::before{background:var(--ruim);} .stat.s-aus::before{background:var(--aus);}
+  .stat .lbl{font-weight:700;font-size:15px;display:flex;align-items:center;gap:7px;}
+  .stat .key{font-size:11.5px;color:var(--faint);font-family:ui-monospace,"Cascadia Code",Consolas,monospace;margin-top:1px;}
+  .stat .desc{font-size:13px;color:var(--muted);margin-top:9px;line-height:1.45;}
+
+  /* tables */
+  .tbl-wrap{overflow-x:auto;border:1px solid var(--hair);border-radius:var(--r-sm);}
+  table{border-collapse:collapse;width:100%;font-size:14px;}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--hair);vertical-align:top;}
+  th{font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--faint);font-weight:600;background:var(--surface-2);position:sticky;top:0;}
+  tr:last-child td{border-bottom:none;}
+  td.num,th.num{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;}
+  td code,.mono{font-family:ui-monospace,"Cascadia Code",Consolas,monospace;font-size:12.5px;background:var(--accent-soft);color:var(--accent-ink);padding:1px 6px;border-radius:5px;}
+
+  /* chip list */
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 2px;}
+  .chip{font-size:13px;background:var(--surface-2);border:1px solid var(--hair);border-radius:7px;padding:4px 10px;color:#33424F;}
+  .chip.star{border-color:var(--accent);color:var(--accent-ink);background:var(--accent-soft);font-weight:500;}
+
+  /* callout */
+  .note{border-left:3px solid var(--accent);background:var(--accent-soft);padding:13px 16px;border-radius:0 8px 8px 0;font-size:14px;color:var(--accent-ink);}
+  .note.warn{border-color:var(--reg);background:var(--reg-bg);color:#7a5210;}
+  .note b{color:inherit;}
+
+  /* flow */
+  .flow{display:flex;flex-direction:column;gap:0;}
+  .flow .step{display:flex;gap:14px;padding:13px 0;border-bottom:1px dashed var(--hair);}
+  .flow .step:last-child{border-bottom:none;}
+  .flow .step .i{flex:none;width:26px;height:26px;border-radius:7px;background:var(--accent-soft);color:var(--accent-ink);
+    font-weight:700;font-size:13px;display:grid;place-items:center;font-variant-numeric:tabular-nums;}
+  .flow .step .t{font-size:14.5px;}
+  .flow .step .t b{display:block;margin-bottom:1px;}
+  .flow .step .t span{color:var(--muted);font-size:13.5px;}
+
+  .kv{font-size:14px;}
+  .kv b{font-weight:600;}
+  ul.clean{margin:8px 0 4px;padding-left:20px;}
+  ul.clean li{margin:5px 0;color:#283642;}
+  .small{font-size:13px;color:var(--muted);}
+  footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--hair);font-size:12.5px;color:var(--faint);}
+  footer code{font-family:ui-monospace,Consolas,monospace;}
+</style>
+
+<div class="wrap">
+<nav>
+  <div class="brand">
+    <div class="dot">MM</div>
+    <div><b>Vistoria Guiada</b><span>Regras &amp; lógica</span></div>
+  </div>
+  <div class="navlist">
+    <a href="#fluxo"><span class="n">01</span>Fluxo geral</a>
+    <a href="#status"><span class="n">02</span>Os 4 status</a>
+    <a href="#marcacao"><span class="n">03</span>Regras de marcação</a>
+    <a href="#minimos"><span class="n">04</span>Itens mínimos</a>
+    <a href="#quantidade"><span class="n">05</span>Quantidade</a>
+    <a href="#foto"><span class="n">06</span>Foto</a>
+    <a href="#testes"><span class="n">07</span>Testes</a>
+    <a href="#specs"><span class="n">08</span>Cama &amp; sofá</a>
+    <a href="#grupos"><span class="n">09</span>Grupos de foto</a>
+    <a href="#ambientes"><span class="n">10</span>Ambientes &amp; itens</a>
+    <a href="#manutencao"><span class="n">11</span>Manutenção</a>
+    <a href="#geral"><span class="n">12</span>Dados gerais</a>
+    <a href="#relatorio"><span class="n">13</span>Relatório</a>
+  </div>
+</nav>
+
+<main>
+  <header class="hero">
+    <div class="eyebrow">Documentação interna · App de vistoria</div>
+    <h1>Toda a lógica e as regras da Vistoria Guiada</h1>
+    <p class="lede">Referência completa extraída do código do app (a Monica). O que conta como item mínimo, quando a foto é obrigatória, como a quantidade vira ressalva, o que cai em manutenção — e o catálogo de itens por ambiente.</p>
+    <div class="meta-row">
+      <span class="tag">Fonte: index.html</span>
+      <span class="tag">43 itens mínimos</span>
+      <span class="tag">4 status</span>
+      <span class="tag">16 grupos de foto</span>
+      <span class="tag">34 perguntas gerais</span>
+    </div>
+  </header>
+
+  <!-- 01 FLUXO -->
+  <section id="fluxo">
+    <h2><span class="num">01</span> Fluxo geral da vistoria</h2>
+    <div class="card">
+      <div class="flow">
+        <div class="step"><div class="i">1</div><div class="t"><b>Setup</b><span>Nome do vistoriador, código do imóvel, nº de hóspedes (vem pré-preenchido pela URL do Sapron quando existe).</span></div></div>
+        <div class="step"><div class="i">2</div><div class="t"><b>Intro da Monica</b><span>Uma narração contínua explicando a importância da vistoria. Voz + avatar disparam juntos no clique de “Iniciar”.</span></div></div>
+        <div class="step"><div class="i">3</div><div class="t"><b>Seleção visual de ambientes</b><span>Grade de 9 tipos com contador. Monta o template (2 quartos → “Quarto 1”/“Quarto 2”).</span></div></div>
+        <div class="step"><div class="i">4</div><div class="t"><b>Vistoria por unidades</b><span>Cada ambiente percorre suas <b>unidades</b> — um item solto OU um grupo de 1 foto. Status por clique acima da foto.</span></div></div>
+        <div class="step"><div class="i">5</div><div class="t"><b>Item extra</b><span>No fim de cada ambiente, pergunta se há algum item fora da lista (nome + foto + status).</span></div></div>
+        <div class="step"><div class="i">6</div><div class="t"><b>Questionário de dados gerais</b><span>34 perguntas sobre o imóvel — só no modo Entrada.</span></div></div>
+        <div class="step"><div class="i">7</div><div class="t"><b>Resumo &amp; envio</b><span>Relatório HTML gerado e enviado automático (GitHub + Slack) via Cloudflare Worker.</span></div></div>
+      </div>
+      <div class="note" style="margin-top:18px"><b>Sem reconhecimento de voz:</b> tudo por clique. A voz da Monica (ElevenLabs) continua só para guiar — o vistoriador nunca precisa falar.</div>
+    </div>
+  </section>
+
+  <!-- 02 STATUS -->
+  <section id="status">
+    <h2><span class="num">02</span> Os 4 status de cada item</h2>
+    <div class="card">
+      <div class="statgrid">
+        <div class="stat s-bom"><div class="lbl"><span class="pill p-bom"><span class="ic">✓</span></span> Bom</div><div class="key">ok</div><div class="desc">Item presente e em bom estado. Não gera nenhuma pendência.</div></div>
+        <div class="stat s-reg"><div class="lbl"><span class="pill p-reg"><span class="ic">~</span></span> Regular</div><div class="key">regular</div><div class="desc">Presente, mas com desgaste. Conta como presente, <b>não</b> vira manutenção e <b>não</b> sofre rebaixe por quantidade.</div></div>
+        <div class="stat s-ruim"><div class="lbl"><span class="pill p-ruim"><span class="ic">⚠</span></span> Ruim</div><div class="key">ressalva</div><div class="desc">Presente com problema. <b>Vai para manutenção.</b> Quantidade abaixo do esperado também rebaixa “Bom” para aqui.</div></div>
+        <div class="stat s-aus"><div class="lbl"><span class="pill p-aus"><span class="ic">✗</span></span> Ausente</div><div class="key">ausente</div><div class="desc">Item não existe no imóvel. Sem foto, sem quantidade, sem teste. Se for item mínimo, entra na lista de faltantes.</div></div>
+      </div>
+      <p class="small" style="margin-top:16px;margin-bottom:0">Chaves internas entre parênteses (<span class="mono">ok / regular / ressalva / ausente</span>) — é como o status aparece nos dados salvos e no relatório.</p>
+    </div>
+  </section>
+
+  <!-- 03 MARCACAO -->
+  <section id="marcacao">
+    <h2><span class="num">03</span> Regras de marcação (o que trava o avanço)</h2>
+    <p>Ao tocar um status, o app valida nesta ordem antes de salvar e avançar para a próxima unidade. <b>Ausente é exceção a quase tudo</b> — não exige spec, teste, foto nem quantidade.</p>
+    <div class="card">
+      <div class="flow">
+        <div class="step"><div class="i">A</div><div class="t"><b>Especificação obrigatória (cama / sofá)</b><span>Bom/Regular/Ruim só passam depois de informar o tipo. Ausente pula.</span></div></div>
+        <div class="step"><div class="i">B</div><div class="t"><b>Teste obrigatório (elétrico / hidráulico)</b><span>Item testável exige o resultado do teste antes de marcar. Ausente isenta.</span></div></div>
+        <div class="step"><div class="i">C</div><div class="t"><b>Foto obrigatória</b><span>“Responde primeiro”: toca o status sem foto → arma a escolha e pede a foto → ao fotografar confirma sozinho. Itens abstratos e Ausente não exigem foto.</span></div></div>
+        <div class="step"><div class="i">D</div><div class="t"><b>Rebaixe por quantidade</b><span>Se a quantidade for menor que a esperada e o status for <span class="pill p-bom">✓ Bom</span>, o item é salvo como <span class="pill p-ruim">⚠ Ruim</span> automaticamente (só para itens não-estruturais).</span></div></div>
+      </div>
+      <div class="note warn" style="margin-top:16px"><b>Trava anti-toque-duplo:</b> depois de avançar, cliques são ignorados por 600&nbsp;ms — evita pular dois itens de uma vez.</div>
+    </div>
+  </section>
+
+  <!-- 04 MINIMOS -->
+  <section id="minimos">
+    <h2><span class="num">04</span> Itens mínimos obrigatórios para ativação</h2>
+    <p>São os 43 itens que o imóvel <b>precisa ter</b> para ativar nas plataformas. Durante a vistoria, esses itens ganham o selo “obrigatório pra ativação”. Se algum for marcado <span class="pill p-aus">✗ Ausente</span>, ele entra automaticamente na lista de <b>itens mínimos faltantes</b> do relatório.</p>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">Quartos &amp; sala</h3>
+        <div class="chips">
+          <span class="chip star">Cama</span><span class="chip star">Colchão</span><span class="chip star">Travesseiros</span><span class="chip star">Cabides</span>
+          <span class="chip star">Sofá</span><span class="chip star">Mesa e cadeiras</span><span class="chip star">Televisão</span><span class="chip star">Cortina</span>
+          <span class="chip star">Ar condicionado</span><span class="chip star">Ventilador</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Banheiro</h3>
+        <div class="chips">
+          <span class="chip star">Chuveiro</span><span class="chip star">Box</span><span class="chip star">Lixeira</span><span class="chip star">Espelho</span>
+          <span class="chip star">Escova sanitária</span><span class="chip star">Secador de cabelo</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Cozinha — eletrodomésticos</h3>
+        <div class="chips">
+          <span class="chip star">Fogão</span><span class="chip star">Geladeira</span><span class="chip star">Microondas</span><span class="chip star">Liquidificador</span>
+          <span class="chip star">Cafeteira</span><span class="chip star">Chaleira</span><span class="chip star">Sanduicheira</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Cozinha — utensílios</h3>
+        <div class="chips">
+          <span class="chip star">Facas</span><span class="chip star">Garfos</span><span class="chip star">Colheres de sopa</span><span class="chip star">Pratos grandes</span>
+          <span class="chip star">Copos de vidro</span><span class="chip star">Taças de vinho</span><span class="chip star">Xícaras</span>
+          <span class="chip star">Peneira</span><span class="chip star">Frigideira</span><span class="chip star">Escorredor de louça</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Limpeza &amp; lavanderia</h3>
+        <div class="chips">
+          <span class="chip star">Vassoura</span><span class="chip star">Rodo</span><span class="chip star">Pá de lixo</span><span class="chip star">Balde</span>
+          <span class="chip star">Ferro de passar</span><span class="chip star">Varal</span><span class="chip star">Tábua de roupas</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Conectividade &amp; acesso</h3>
+        <div class="chips">
+          <span class="chip star">Modem de internet</span><span class="chip star">Wi-fi</span><span class="chip star">Chaves</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 QUANTIDADE -->
+  <section id="quantidade">
+    <h2><span class="num">05</span> Regras de quantidade</h2>
+    <p>A quantidade esperada de cada item é calculada assim — campo numérico editável na hora. Quantidade <b>abaixo da esperada</b> rebaixa um “Bom” para “Ruim”.</p>
+    <div class="card" style="margin-bottom:14px">
+      <table>
+        <tr><td style="width:34%"><b>Quantidade fixa</b></td><td>Panelas = <code>3</code> · Frigideira = <code>1</code></td></tr>
+        <tr><td><b>Travesseiros</b></td><td>Calculado pelas camas do ambiente: casal / queen / king = <b>4 por cama</b>; solteiro / auxiliar e sofá-cama = <b>1</b>. Sem cama → cai no nº de hóspedes.</td></tr>
+        <tr><td><b>Por hóspede</b></td><td>Esperado = nº de hóspedes (lista abaixo).</td></tr>
+        <tr><td><b>Demais itens</b></td><td>Esperado = <code>1</code>.</td></tr>
+        <tr><td><b>Itens estruturais</b></td><td>Não têm contagem nem rebaixe por quantidade (piso, parede, teto, lâmpadas, etc.).</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Itens contados por hóspede</h3>
+      <div class="chips">
+        <span class="chip">Garfos</span><span class="chip">Facas</span><span class="chip">Colheres de sopa</span><span class="chip">Colheres de chá</span>
+        <span class="chip">Pratos grandes</span><span class="chip">Pratos fundos</span><span class="chip">Pratos de sobremesa</span>
+        <span class="chip">Copos de vidro</span><span class="chip">Taças de vinho</span><span class="chip">Xícaras</span>
+        <span class="chip">Cabides</span><span class="chip">Enxoval</span><span class="chip">Pano de prato</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 FOTO -->
+  <section id="foto">
+    <h2><span class="num">06</span> Regras de foto</h2>
+    <p>Foto é obrigatória para qualquer item presente (Bom / Regular / Ruim). Pode tirar <b>quantas fotos quiser</b> por item — cada uma vai pro relatório com a etiqueta da condição. Duas exceções:</p>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0"><span class="pill p-aus">✗</span> Ausente</h3>
+        <p style="margin-bottom:0" class="small">Item ausente nunca pede foto.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">Itens abstratos (sem foto)</h3>
+        <div class="chips">
+          <span class="chip">Capacidade de hóspedes</span><span class="chip">Tour pelo imóvel</span><span class="chip">Pin de localização</span>
+          <span class="chip">Itens pessoais do proprietário</span><span class="chip">Controle da televisão</span><span class="chip">Controle do ar condicionado</span>
+          <span class="chip">Voltagem</span><span class="chip">Wi-fi</span><span class="chip">Interfone</span><span class="chip">Chaves</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 TESTES -->
+  <section id="testes">
+    <h2><span class="num">07</span> Testes elétrico &amp; hidráulico</h2>
+    <p>Itens elétricos e hidráulicos exigem o resultado de um teste antes de serem marcados (Ausente isenta). O resultado vira um selo no relatório.</p>
+    <div class="grid2" style="margin-bottom:14px">
+      <div class="card">
+        <h3 style="margin-top:0">⚡ Elétrico</h3>
+        <p class="small">Resultado: <span class="pill p-bom">Funcionou</span> ou <span class="pill p-ruim">Estragado</span></p>
+        <div class="chips">
+          <span class="chip">Televisão</span><span class="chip">Ventilador</span><span class="chip">Ar condicionado</span><span class="chip">Geladeira</span>
+          <span class="chip">Freezer</span><span class="chip">Fogão</span><span class="chip">Forno</span><span class="chip">Microondas</span>
+          <span class="chip">Cafeteira</span><span class="chip">Liquidificador</span><span class="chip">Chaleira</span><span class="chip">Airfryer</span>
+          <span class="chip">Sanduicheira</span><span class="chip">Lava louça</span><span class="chip">Máquina de lavar</span><span class="chip">Secadora</span>
+          <span class="chip">Ferro de passar</span><span class="chip">Lâmpadas</span><span class="chip">Tomadas</span><span class="chip">Exaustor</span>
+          <span class="chip">Modem</span><span class="chip">Secador de cabelo</span><span class="chip">Frigobar</span><span class="chip">Quadro de luz</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">💧 Hidráulico</h3>
+        <p class="small">Resultado: <span class="pill p-bom">Sem vazamento</span> ou <span class="pill p-ruim">Com vazamento</span></p>
+        <div class="chips">
+          <span class="chip">Torneira (cozinha / serviço / banheiro)</span><span class="chip">Chuveiro</span><span class="chip">Vaso sanitário</span>
+          <span class="chip">Bidê</span><span class="chip">Ducha higiênica</span><span class="chip">Banheira</span><span class="chip">Ralo</span>
+          <span class="chip">Máquina de lavar</span><span class="chip">Lava louça</span>
+        </div>
+      </div>
+    </div>
+    <div class="note">Há também itens <b>estruturais testáveis</b> (porta, janelas, cortina, lareira, cofre) com instrução de teste, mas sem o selo funcionou/vazamento.</div>
+  </section>
+
+  <!-- 08 SPECS -->
+  <section id="specs">
+    <h2><span class="num">08</span> Especificações de cama &amp; sofá</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">🛏️ Cama</h3>
+        <p class="kv">Tipo obrigatório: <b>Solteiro · Casal · Queen · King · Auxiliar</b></p>
+        <p class="small" style="margin-bottom:0">Botão “tenho dúvida” → a Monica ensina a medir pelo travesseiro. O tipo da cama também define quantos travesseiros são esperados.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">🛋️ Sofá</h3>
+        <p class="kv">É sofá-cama? <b>Sim / Não</b></p>
+        <p class="kv">Se Sim → tamanho: <b>Casal / Solteiro</b> <span class="small">(pergunta condicional)</span></p>
+        <p class="small" style="margin-bottom:0">Sofá-cama conta +1 travesseiro no ambiente.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 09 GRUPOS -->
+  <section id="grupos">
+    <h2><span class="num">09</span> Grupos — 1 foto cobre vários itens</h2>
+    <p>16 grupos: uma única foto cobre o conjunto, mas <b>cada item é marcado individualmente</b> (status + quantidade). Grupo com um só membro presente vira item normal.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Grupo</th><th>Itens</th></tr></thead>
+        <tbody>
+          <tr><td>Talheres</td><td class="small">Garfos, Facas, Colheres de sopa, Colheres de chá, Facas de corte</td></tr>
+          <tr><td>Copos, xícaras e taças</td><td class="small">Copos de vidro, Xícaras, Taças de vinho</td></tr>
+          <tr><td>Pratos</td><td class="small">Pratos grandes, Pratos fundos, Pratos de sobremesa</td></tr>
+          <tr><td>Preparo</td><td class="small">Tábua, Peneira, Escorredor de louça</td></tr>
+          <tr><td>Utensílios de cozinha</td><td class="small">Abridor de vinho, Pegador de macarrão, Pano de prato, Colheres para cozinhar</td></tr>
+          <tr><td>Panelas e frigideira</td><td class="small">Panelas, Frigideira</td></tr>
+          <tr><td>Outros da cozinha</td><td class="small">Jarra de água, Lixeira de pia, Lixeira de lixo seco, Forma de alumínio</td></tr>
+          <tr><td>Limpeza</td><td class="small">Vassoura, Rodo, Pá de lixo, Balde</td></tr>
+          <tr><td>Televisão + Controle</td><td class="small">Televisão, Controle da televisão</td></tr>
+          <tr><td>Ar-condicionado + Controle</td><td class="small">Ar condicionado, Controle do ar condicionado</td></tr>
+          <tr><td>Acabamento</td><td class="small">Piso, Parede, Teto (inclui prefixos Quarto/Banheiro)</td></tr>
+          <tr><td>Elétrica</td><td class="small">Lâmpadas, Interruptores/tomadas (inclui prefixos)</td></tr>
+          <tr><td>Janelas e cortina</td><td class="small">Janelas, Cortina, Tela de proteção (inclui prefixos)</td></tr>
+          <tr><td>Vaso, bidê e ducha</td><td class="small">Vaso sanitário, Bidê, Ducha higiênica</td></tr>
+          <tr><td>Chuveiro e box</td><td class="small">Chuveiro, Box</td></tr>
+          <tr><td>Torneira e espelho</td><td class="small">Torneira, Espelho</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 10 AMBIENTES -->
+  <section id="ambientes">
+    <h2><span class="num">10</span> Ambientes e seus itens</h2>
+    <p>Na seleção visual há 9 tipos de ambiente. Cada um carrega sua lista de itens. Abaixo, os itens de cada ambiente (entre parênteses, a contagem de itens).</p>
+
+    <div class="card"><h3 style="margin-top:0">🛏️ Quarto <span class="small">(21)</span></h3>
+    <div class="chips"><span class="chip">Cama</span><span class="chip">Colchão</span><span class="chip">Travesseiros</span><span class="chip">Arara para roupas</span><span class="chip">Armário</span><span class="chip">Cabides</span><span class="chip">Televisão</span><span class="chip">Controle da TV</span><span class="chip">Ventilador</span><span class="chip">Ar condicionado</span><span class="chip">Controle do ar</span><span class="chip">Berço</span><span class="chip">Janelas</span><span class="chip">Tela de proteção</span><span class="chip">Cortina</span><span class="chip">Lâmpadas</span><span class="chip">Interruptores/tomadas</span><span class="chip">Piso</span><span class="chip">Parede</span><span class="chip">Teto</span><span class="chip">Porta</span></div></div>
+
+    <div class="card"><h3 style="margin-top:0">🛌 Suíte <span class="small">(40 — quarto + banheiro privativo)</span></h3>
+    <p class="small" style="margin-bottom:0">Quarto completo + banheiro com prefixos <code>Quarto -</code> / <code>Banheiro -</code> separando acabamento e elétrica de cada lado. Inclui chuveiro, box, vaso, bidê, ducha, torneira, espelho, secador, itens de higiene.</p></div>
+
+    <div class="card"><h3 style="margin-top:0">🏢 Studio <span class="small">(31 — tudo num cômodo, sem cozinha)</span></h3>
+    <p class="small" style="margin-bottom:0">Sala + quarto + banheiro integrados. Cama, sofá, mesa, TV, ar, banheiro completo. <b>Não tem cozinha de propósito.</b></p></div>
+
+    <div class="card"><h3 style="margin-top:0">🛋️ Sala <span class="small">(17)</span></h3>
+    <div class="chips"><span class="chip">Sofá</span><span class="chip">Televisão</span><span class="chip">Controle da TV</span><span class="chip">Ventilador</span><span class="chip">Ar condicionado</span><span class="chip">Controle do ar</span><span class="chip">Lareira interna</span><span class="chip">Janelas</span><span class="chip">Cortina</span><span class="chip">Lâmpadas</span><span class="chip">Interruptores/tomadas</span><span class="chip">Piso</span><span class="chip">Parede</span><span class="chip">Teto</span><span class="chip">Porta</span><span class="chip">Mesa e cadeiras</span><span class="chip">Itens decorativos</span></div></div>
+
+    <div class="card"><h3 style="margin-top:0">🍳 Cozinha <span class="small">(44)</span></h3>
+    <div class="chips"><span class="chip">Garfos</span><span class="chip">Facas</span><span class="chip">Colheres de sopa</span><span class="chip">Colheres de chá</span><span class="chip">Abridor</span><span class="chip">Colheres p/ cozinhar</span><span class="chip">Pegador de macarrão</span><span class="chip">Facas de corte</span><span class="chip">Peneira</span><span class="chip">Tábua</span><span class="chip">Pratos grandes</span><span class="chip">Pratos fundos</span><span class="chip">Pratos de sobremesa</span><span class="chip">Copos de vidro</span><span class="chip">Taças de vinho</span><span class="chip">Xícaras</span><span class="chip">Panelas</span><span class="chip">Frigideira</span><span class="chip">Pano de prato</span><span class="chip">Torneira cozinha</span><span class="chip">Escorredor</span><span class="chip">Lixeira de pia</span><span class="chip">Lixeira lixo seco</span><span class="chip">Jarra de água</span><span class="chip">Liquidificador</span><span class="chip">Chaleira</span><span class="chip">Sanduicheira</span><span class="chip">Cafeteira</span><span class="chip">Microondas</span><span class="chip">Airfryer</span><span class="chip">Lava louça</span><span class="chip">Geladeira</span><span class="chip">Freezer</span><span class="chip">Fogão</span><span class="chip">Forno</span><span class="chip">Forma de alumínio</span><span class="chip">Janelas</span><span class="chip">Cortina</span><span class="chip">Lâmpadas</span><span class="chip">Tomadas</span><span class="chip">Piso/Parede/Teto</span><span class="chip">Porta</span></div></div>
+
+    <div class="card"><h3 style="margin-top:0">🚿 Banheiro <span class="small">(22)</span></h3>
+    <div class="chips"><span class="chip">Chuveiro</span><span class="chip">Ralo</span><span class="chip">Janelas</span><span class="chip">Cortina</span><span class="chip">Box</span><span class="chip">Vaso sanitário</span><span class="chip">Bidê</span><span class="chip">Ducha higiênica</span><span class="chip">Banheira</span><span class="chip">Lixeira</span><span class="chip">Escova sanitária</span><span class="chip">Exaustor</span><span class="chip">Torneira</span><span class="chip">Espelho</span><span class="chip">Secador de cabelo</span><span class="chip">Itens de higiene</span><span class="chip">Lâmpadas</span><span class="chip">Tomadas</span><span class="chip">Piso/Parede/Teto</span><span class="chip">Porta</span></div></div>
+
+    <div class="card"><h3 style="margin-top:0">🧺 Área de serviço <span class="small">(17)</span></h3>
+    <div class="chips"><span class="chip">Torneira área de serviço</span><span class="chip">Máquina de lavar</span><span class="chip">Secadora</span><span class="chip">Tábua de roupas</span><span class="chip">Varal</span><span class="chip">Vassoura</span><span class="chip">Rodo</span><span class="chip">Pá de lixo</span><span class="chip">Balde</span><span class="chip">Ferro de passar</span><span class="chip">Lâmpadas</span><span class="chip">Tomadas</span><span class="chip">Piso/Parede/Teto</span><span class="chip">Porta</span><span class="chip">Janela</span></div></div>
+
+    <div class="card"><h3 style="margin-top:0">🚽 Lavabo <span class="small">· 🌅 Varanda</span></h3>
+    <p class="small" style="margin:0 0 6px"><b>Lavabo:</b> vaso, ducha, lixeira, escova, torneira, espelho, janelas, exaustor, elétrica, acabamento, porta, itens de higiene.</p>
+    <p class="small" style="margin:0"><b>Varanda:</b> porta, piso, parede, teto, guarda-corpo, lâmpadas, ralo.</p></div>
+
+    <div class="note" style="margin-top:14px">Há ainda o ambiente <b>“Geral”</b> (interfone, modem, Wi-fi, capacidade de hóspedes, enxoval, tour, quadro de luz, chaves, voltagem, cofre, frigobar, pin de localização) usado nos templates fixos.</div>
+  </section>
+
+  <!-- 11 MANUTENCAO -->
+  <section id="manutencao">
+    <h2><span class="num">11</span> Roteamento de manutenção</h2>
+    <p>Todo item marcado <span class="pill p-ruim">⚠ Ruim</span> ou <span class="pill p-aus">✗ Ausente</span> entra em manutenção e é agrupado por tipo no relatório. <b>“Regular” não vai para manutenção.</b></p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Encaminhamento</th><th>Quais itens</th></tr></thead>
+        <tbody>
+          <tr><td>⚡ Elétrica</td><td class="small">Itens da categoria elétrica</td></tr>
+          <tr><td>💧 Hidráulica</td><td class="small">Itens da categoria hidráulica</td></tr>
+          <tr><td>🔧 Estrutural</td><td class="small">Estruturais testáveis (porta, janelas, cortina, lareira, cofre)</td></tr>
+          <tr><td>📦 Geral</td><td class="small">Todo o resto</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 12 GERAL -->
+  <section id="geral">
+    <h2><span class="num">12</span> Questionário de dados gerais (34 perguntas)</h2>
+    <p>Só no modo Entrada, depois do último ambiente. Resposta por clique (única / múltipla / texto). Vira a seção “Dados Gerais do Imóvel” no relatório. Algumas perguntas são condicionais (garagem, piscina, áreas comuns).</p>
+    <div class="grid2">
+      <div class="card"><h3 style="margin-top:0">Segurança</h3><div class="chips"><span class="chip">Alarme</span><span class="chip">Detector de fumaça</span><span class="chip">Extintor</span><span class="chip">Câmera</span></div></div>
+      <div class="card"><h3 style="margin-top:0">Reserva &amp; check-in</h3><div class="chips"><span class="chip">Horário máx. instantânea</span><span class="chip">Tempo de preparo</span><span class="chip">Tipo de check-in</span></div></div>
+      <div class="card"><h3 style="margin-top:0">Acesso &amp; condomínio</h3><div class="chips"><span class="chip">Tipo de porta</span><span class="chip">Senha da porta</span><span class="chip">Chaves do condomínio</span><span class="chip">Senha do condomínio</span><span class="chip">App do condomínio</span><span class="chip">Wi-Fi (rede/senha)</span></div></div>
+      <div class="card"><h3 style="margin-top:0">Garagem <span class="small">(condicional)</span></h3><div class="chips"><span class="chip">Regra</span><span class="chip">Tipo</span><span class="chip">Nº de carros</span><span class="chip">Tamanho</span><span class="chip">Nº da vaga</span><span class="chip">Carregador EV</span><span class="chip">Controles</span></div></div>
+      <div class="card"><h3 style="margin-top:0">Imóvel</h3><div class="chips"><span class="chip">Metragem</span><span class="chip">Andar</span><span class="chip">Acessibilidade</span><span class="chip">Voltagem</span><span class="chip">Clima da região</span></div></div>
+      <div class="card"><h3 style="margin-top:0">Lazer &amp; entorno</h3><div class="chips"><span class="chip">Piscina (tipo/compart.)</span><span class="chip">Cadeiras</span><span class="chip">Terraço</span><span class="chip">Diferenciais</span><span class="chip">Áreas comuns</span><span class="chip">Proximidades</span><span class="chip">Acessos diferenciados</span></div></div>
+    </div>
+  </section>
+
+  <!-- 13 RELATORIO -->
+  <section id="relatorio">
+    <h2><span class="num">13</span> Relatório &amp; envio</h2>
+    <div class="card">
+      <ul class="clean">
+        <li><b>Relatório HTML</b> — accordion por ambiente, todas as fotos com etiqueta de condição, selos de teste, seção “Dados Gerais”, manutenção agrupada, itens mínimos faltantes e assinatura.</li>
+        <li><b>Resumo</b> — contagem de Bom / Regular / Ruim / Ausente, quantidade baixa e encaminhamentos.</li>
+        <li><b>Envio automático</b> — o app manda para um Cloudflare Worker que faz commit do relatório (link permanente) e posta no Slack <code>#vistorias-app-teste</code>.</li>
+        <li><b>Persistência</b> — cada item é salvo no <code>localStorage</code> ao avançar; fotos no IndexedDB.</li>
+      </ul>
+    </div>
+    <footer>
+      Gerado a partir de <code>~/Implantação/vistoria-seazone/index.html</code> · Produção: <code>lariconstantino.github.io/vistoria-seazone</code><br>
+      Referência viva — se a lógica mudar no código, esta página precisa ser regerada.
+    </footer>
+  </section>
+</main>
+</div>
