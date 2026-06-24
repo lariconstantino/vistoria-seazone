@@ -2418,7 +2418,7 @@ async function compressImage(file){
     const img=new Image();
     const url=URL.createObjectURL(file);
     img.onload=()=>{
-      let w=img.naturalWidth,h=img.naturalHeight,maxPx=1920,maxKB=800;
+      let w=img.naturalWidth,h=img.naturalHeight,maxPx=1280,maxKB=300;
       if(w>maxPx){h=Math.round(h*maxPx/w);w=maxPx;}
       if(h>maxPx){w=Math.round(w*maxPx/h);h=maxPx;}
       const canvas=document.createElement('canvas');
@@ -2921,27 +2921,69 @@ async function gerarRelatorioHTML(){
   w.document.close();
 }
 
-// Envia o relatório pro Worker (commit no GitHub + post no Slack). Silencioso se não configurado.
-async function autoSendReport(){
-  const statusEl=document.getElementById('send-status');
-  if(!REPORT_WORKER_URL){ if(statusEl) statusEl.style.display='none'; return; }
-  if(!S.results||!S.results.length) return;
-  if(statusEl){ statusEl.style.display='block'; statusEl.textContent='⏳ Enviando relatório para registro…'; statusEl.style.color='var(--muted)'; }
+// Baixa o HTML do relatório no próprio aparelho — garantia de NUNCA perder a vistoria.
+function downloadReportHTML(html){
   try{
-    const html=await buildReportHTML();
+    const blob=new Blob([html],{type:'text/html'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    const d=new Date(),pad=n=>String(n).padStart(2,'0');
+    a.download='vistoria-'+(S.prop||'imovel')+'-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'-'+pad(d.getHours())+pad(d.getMinutes())+'.html';
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},1500);
+    return true;
+  }catch(e){ return false; }
+}
+
+// POST único com timeout (evita ficar pendurado em rede móvel ruim).
+async function postReport(html,timeoutMs){
+  const ctrl=new AbortController();
+  const t=setTimeout(()=>ctrl.abort(),timeoutMs);
+  try{
     const res=await fetch(REPORT_WORKER_URL,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({code:S.prop,html})
+      body:JSON.stringify({code:S.prop,html}),
+      signal:ctrl.signal
     });
     const data=await res.json().catch(()=>({}));
-    if(res.ok&&data.url){
-      if(statusEl){ statusEl.innerHTML='✅ Relatório registrado — <a href="'+data.url+'" target="_blank" style="color:var(--blue);font-weight:700">abrir link</a>'; statusEl.style.color='var(--green)'; }
-    } else {
-      if(statusEl){ statusEl.textContent='⚠ Não consegui registrar agora (relatório segue disponível no botão acima).'; statusEl.style.color='var(--orange,#FF8904)'; }
-    }
-  }catch(e){
-    if(statusEl){ statusEl.textContent='⚠ Sem conexão para registrar agora (relatório segue disponível no botão acima).'; statusEl.style.color='var(--orange,#FF8904)'; }
+    return {ok:res.ok&&!!data.url,data};
+  } finally { clearTimeout(t); }
+}
+
+// Registra o relatório (Worker → GitHub + Slack). Se falhar, baixa o HTML no aparelho — nunca perde.
+async function autoSendReport(){
+  const statusEl=document.getElementById('send-status');
+  if(!S.results||!S.results.length) return;
+  if(statusEl){ statusEl.style.display='block'; statusEl.textContent='⏳ Enviando relatório para registro…'; statusEl.style.color='var(--muted)'; }
+  const html=await buildReportHTML();
+
+  // Sem Worker configurado: garante o HTML no aparelho mesmo assim.
+  if(!REPORT_WORKER_URL){
+    const saved=downloadReportHTML(html);
+    if(statusEl){ statusEl.textContent=saved?'✅ Relatório salvo neste aparelho (confira os Downloads).':'⚠ Toque em "Baixar HTML" acima para salvar o relatório.'; statusEl.style.color=saved?'var(--green)':'var(--orange,#FF8904)'; }
+    return;
+  }
+
+  // Até 2 tentativas com timeout de 90s.
+  for(let attempt=1; attempt<=2; attempt++){
+    if(statusEl && attempt===2) statusEl.textContent='⏳ Conexão lenta — tentando registrar de novo…';
+    try{
+      const {ok,data}=await postReport(html,90000);
+      if(ok){
+        if(statusEl){ statusEl.innerHTML='✅ Relatório registrado — <a href="'+data.url+'" target="_blank" style="color:var(--blue);font-weight:700">abrir link</a>'; statusEl.style.color='var(--green)'; }
+        return;
+      }
+    }catch(e){ /* timeout/rede: tenta de novo ou cai no fallback */ }
+  }
+
+  // Não registrou online: NUNCA perde — baixa o HTML no aparelho.
+  const saved=downloadReportHTML(html);
+  if(statusEl){
+    statusEl.innerHTML=saved
+      ? '⚠ Sem conexão para registrar online, mas <b>salvei o relatório neste aparelho</b> (confira os Downloads). Envie esse arquivo para a Larissa.'
+      : '⚠ Não consegui registrar online. <b>Não feche esta tela</b> — toque em "Baixar HTML" acima e envie o arquivo para a Larissa.';
+    statusEl.style.color='var(--orange,#FF8904)';
   }
 }
 
